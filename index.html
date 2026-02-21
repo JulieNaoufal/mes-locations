@@ -2,7 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mes Locations">
+<meta name="theme-color" content="#2C2825">
 <title>Mes Locations</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -11,23 +15,40 @@
   --brown: #7C5C3E; --terracotta: #C4704A; --sage: #7A8C6E;
   --gold: #C9A96E; --light-brown: #E8DDD0; --mid-brown: #D4C4B0;
   --text-muted: #8A7A6A; --gmail-red: #EA4335;
+  --nav-h: 64px; --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); min-height: 100vh; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overscroll-behavior: none; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); }
+
+/* ===================== DESKTOP LAYOUT ===================== */
 .app { display: flex; min-height: 100vh; }
 
-/* SIDEBAR */
-.sidebar { width: 260px; background: var(--charcoal); color: var(--cream); padding: 32px 0; flex-shrink: 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar {
+  width: 260px; background: var(--charcoal); color: var(--cream);
+  padding: 32px 0; flex-shrink: 0; display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
 .sidebar-logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .sidebar-logo h1 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; line-height: 1.2; color: var(--gold); }
 .sidebar-logo p { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em; }
+
 .gmail-status { margin: 14px 24px; padding: 10px 14px; border-radius: 10px; font-size: 0.78rem; display: flex; align-items: center; gap: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 .gmail-status.connected { background: rgba(122,140,110,0.2); border-color: var(--sage); color: #A8C49A; }
 .gmail-status.disconnected { background: rgba(234,67,53,0.15); border-color: rgba(234,67,53,0.3); color: #F08080; }
 .gmail-status .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.gmail-status.connected .dot { background: var(--sage); box-shadow: 0 0 6px var(--sage); }
+.gmail-status.connected .dot { background: var(--sage); box-shadow: 0 0 6px var(--sage); animation: pulse 2s infinite; }
 .gmail-status.disconnected .dot { background: var(--gmail-red); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 .gmail-status .gmail-email { font-size: 0.68rem; opacity: 0.8; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.airtable-status { margin: 0 24px 14px; padding: 8px 14px; border-radius: 10px; font-size: 0.75rem; display: flex; align-items: center; gap: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); }
+.airtable-status.connected { background: rgba(74,144,226,0.15); border-color: rgba(74,144,226,0.3); color: #7BB3F0; }
+.airtable-status.disconnected { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+.airtable-status .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.airtable-status.connected .dot { background: #4A90E2; }
+.airtable-status.disconnected .dot { background: var(--text-muted); }
+
 .sidebar-nav { padding: 8px 0; flex: 1; }
 .nav-label { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); padding: 0 24px; margin-bottom: 4px; margin-top: 14px; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 24px; cursor: pointer; transition: all 0.2s; font-size: 0.86rem; color: rgba(247,243,238,0.7); border-left: 3px solid transparent; }
@@ -39,48 +60,86 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .badge-brown { background: var(--terracotta); color: white; }
 .sidebar-footer { padding: 14px 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.73rem; color: var(--text-muted); }
 
-/* MAIN */
+/* ===================== MAIN ===================== */
 .main { flex: 1; overflow-y: auto; padding: 36px 40px; }
 .page { display: none; }
 .page.active { display: block; animation: fadeIn 0.25s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
-/* HEADERS */
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
-.page-title { font-family: 'DM Serif Display', serif; font-size: 1.9rem; }
+/* ===================== MOBILE NAV (bottom) ===================== */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--charcoal); border-top: 1px solid rgba(255,255,255,0.1);
+  z-index: 900; padding-bottom: var(--safe-bottom);
+}
+.mobile-nav-items { display: flex; }
+.mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px 8px; cursor: pointer; color: rgba(255,255,255,0.5); font-size: 0.58rem; gap: 3px; transition: color 0.2s; border: none; background: none; font-family: 'DM Sans', sans-serif; }
+.mobile-nav-item.active { color: var(--gold); }
+.mobile-nav-item .m-icon { font-size: 1.2rem; line-height: 1; }
+.mobile-nav-badge { position: relative; display: inline-block; }
+.mobile-nav-badge::after { content: attr(data-count); position: absolute; top: -4px; right: -8px; background: var(--gmail-red); color: white; border-radius: 8px; font-size: 0.55rem; padding: 1px 4px; font-weight: 700; display: none; }
+.mobile-nav-badge.has-badge::after { display: block; }
+
+/* ===================== MOBILE HEADER ===================== */
+.mobile-header { display: none; background: var(--charcoal); color: white; padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top, 0px)); position: sticky; top: 0; z-index: 800; }
+.mobile-header-inner { display: flex; justify-content: space-between; align-items: center; }
+.mobile-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--gold); }
+.mobile-header-right { display: flex; gap: 8px; align-items: center; }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mobile-nav { display: block; }
+  .mobile-header { display: block; }
+  .app { flex-direction: column; }
+  .main { padding: 14px 14px calc(var(--nav-h) + var(--safe-bottom) + 20px); }
+  .stats-bar { grid-template-columns: repeat(2,1fr); }
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .apt-detail-meta { gap: 12px; }
+  .page-header { flex-direction: column; gap: 10px; }
+  .page-header .btn { align-self: flex-start; }
+  .email-detail-actions { gap: 5px; }
+  .email-detail-actions .btn { font-size: 0.75rem; padding: 6px 10px; }
+  .modal { margin: 10px; max-height: calc(100vh - 20px); }
+  .compose-footer { flex-wrap: wrap; }
+}
+
+/* ===================== COMPONENTS ===================== */
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 1.8rem; }
 .page-title span { font-style: italic; color: var(--terracotta); }
-.page-subtitle { color: var(--text-muted); font-size: 0.86rem; margin-top: 4px; }
-.back-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.84rem; display: flex; align-items: center; gap: 6px; margin-bottom: 16px; padding: 0; font-family: 'DM Sans', sans-serif; transition: color 0.2s; }
+.page-subtitle { color: var(--text-muted); font-size: 0.84rem; margin-top: 3px; }
+.back-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.84rem; display: flex; align-items: center; gap: 6px; margin-bottom: 14px; padding: 0; font-family: 'DM Sans', sans-serif; transition: color 0.2s; }
 .back-btn:hover { color: var(--charcoal); }
 
-/* STATS */
-.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
-.stat-card { background: var(--warm-white); border-radius: 12px; padding: 18px; border: 1px solid var(--light-brown); text-align: center; }
-.stat-card .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.9rem; color: var(--terracotta); }
-.stat-card .stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+.stats-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+.stat-card { background: var(--warm-white); border-radius: 12px; padding: 16px; border: 1px solid var(--light-brown); text-align: center; }
+.stat-card .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--terracotta); }
+.stat-card .stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
 
-/* CARDS */
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; }
 .apt-card { background: var(--warm-white); border-radius: 16px; overflow: hidden; border: 1px solid var(--light-brown); cursor: pointer; transition: all 0.25s; }
 .apt-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(44,40,37,0.12); border-color: var(--gold); }
-.apt-card-img { height: 148px; background: var(--light-brown); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.apt-card-img .no-photo { text-align: center; color: var(--text-muted); }
-.apt-card-img .no-photo span { font-size: 2.2rem; display: block; }
-.apt-card-img .no-photo p { font-size: 0.7rem; margin-top: 4px; }
+.apt-card:active { transform: scale(0.98); }
+.apt-card-img { height: 140px; background: var(--light-brown); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .apt-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.apt-status-badge { position: absolute; top: 10px; right: 10px; padding: 3px 9px; border-radius: 20px; font-size: 0.67rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.no-photo { text-align: center; color: var(--text-muted); }
+.no-photo span { font-size: 2rem; display: block; }
+.no-photo p { font-size: 0.68rem; margin-top: 3px; }
+.apt-status-badge { position: absolute; top: 8px; right: 8px; padding: 3px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
 .status-disponible { background: var(--sage); color: white; }
 .status-loue { background: var(--terracotta); color: white; }
 .status-en-cours { background: var(--gold); color: var(--charcoal); }
-.apt-card-body { padding: 16px 18px 10px; }
-.apt-card-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; margin-bottom: 4px; }
-.apt-card-meta { font-size: 0.76rem; color: var(--text-muted); display: flex; gap: 10px; flex-wrap: wrap; }
-.apt-card-footer { padding: 10px 18px; border-top: 1px solid var(--light-brown); display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; }
+.apt-card-body { padding: 14px 16px 8px; }
+.apt-card-title { font-family: 'DM Serif Display', serif; font-size: 1rem; margin-bottom: 3px; }
+.apt-card-meta { font-size: 0.74rem; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
+.apt-card-footer { padding: 8px 16px; border-top: 1px solid var(--light-brown); display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem; }
 .candidate-count { color: var(--brown); font-weight: 500; }
-.apt-price { font-family: 'DM Serif Display', serif; font-size: 1rem; color: var(--terracotta); }
+.apt-price { font-family: 'DM Serif Display', serif; font-size: 0.95rem; color: var(--terracotta); }
 
 /* BUTTONS */
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; -webkit-user-select: none; }
 .btn-primary { background: var(--terracotta); color: white; }
 .btn-primary:hover { background: #B5613D; }
 .btn-gmail { background: var(--gmail-red); color: white; }
@@ -91,73 +150,65 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .btn-ghost:hover { color: var(--charcoal); background: var(--light-brown); }
 .btn-danger { background: transparent; color: #E74C3C; border: 1.5px solid #FADBD8; }
 .btn-danger:hover { background: #FDEDEC; }
-.btn-sm { padding: 5px 12px; font-size: 0.76rem; }
+.btn-sm { padding: 5px 11px; font-size: 0.74rem; }
 .btn-icon { background: none; border: none; cursor: pointer; padding: 5px; border-radius: 6px; color: var(--text-muted); transition: all 0.2s; font-size: 0.95rem; }
 .btn-icon:hover { background: var(--light-brown); color: var(--charcoal); }
 
 /* TABS */
-.tabs { display: flex; gap: 3px; background: var(--light-brown); padding: 4px; border-radius: 10px; margin-bottom: 22px; }
-.tab { flex: 1; text-align: center; padding: 8px; border-radius: 7px; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); transition: all 0.2s; border: none; background: none; font-family: 'DM Sans', sans-serif; }
+.tabs { display: flex; gap: 3px; background: var(--light-brown); padding: 4px; border-radius: 10px; margin-bottom: 20px; }
+.tab { flex: 1; text-align: center; padding: 8px 4px; border-radius: 7px; cursor: pointer; font-size: 0.78rem; color: var(--text-muted); transition: all 0.2s; border: none; background: none; font-family: 'DM Sans', sans-serif; }
 .tab.active { background: white; color: var(--charcoal); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
 
 /* MODAL */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(44,40,37,0.6); z-index: 1000; backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(44,40,37,0.6); z-index: 1000; backdrop-filter: blur(4px); align-items: flex-end; justify-content: center; padding: 0; }
 .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-.modal { background: var(--warm-white); border-radius: 20px; max-width: 660px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 30px 80px rgba(44,40,37,0.25); }
-.modal-header { padding: 24px 30px 16px; border-bottom: 1px solid var(--light-brown); display: flex; justify-content: space-between; align-items: center; }
-.modal-title { font-family: 'DM Serif Display', serif; font-size: 1.3rem; }
-.modal-body { padding: 24px 30px; }
-.modal-footer { padding: 16px 30px; border-top: 1px solid var(--light-brown); display: flex; gap: 8px; justify-content: flex-end; }
+.modal { background: var(--warm-white); border-radius: 20px 20px 0 0; width: 100%; max-width: 660px; max-height: 92vh; overflow-y: auto; box-shadow: 0 -10px 60px rgba(44,40,37,0.25); padding-bottom: var(--safe-bottom); }
+@media (min-width: 769px) {
+  .modal-overlay { align-items: center; padding: 20px; }
+  .modal { border-radius: 20px; max-height: 90vh; }
+}
+.modal-header { padding: 20px 24px 14px; border-bottom: 1px solid var(--light-brown); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--warm-white); z-index: 1; border-radius: 20px 20px 0 0; }
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 1.2rem; }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid var(--light-brown); display: flex; gap: 8px; justify-content: flex-end; position: sticky; bottom: 0; background: var(--warm-white); }
 
 /* FORM */
-.form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 0.76rem; font-weight: 600; color: var(--charcoal); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
-.form-input, .form-textarea, .form-select { width: 100%; padding: 9px 13px; border: 1.5px solid var(--mid-brown); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; background: white; color: var(--charcoal); transition: border-color 0.2s; outline: none; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 0.74rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.form-input, .form-textarea, .form-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--mid-brown); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; background: white; color: var(--charcoal); transition: border-color 0.2s; outline: none; -webkit-appearance: none; }
 .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--terracotta); }
-.form-textarea { min-height: 90px; resize: vertical; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.form-textarea { min-height: 80px; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
 /* SECTION */
-.section { margin-bottom: 28px; }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.section-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; }
+.section { margin-bottom: 24px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.section-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; }
 
 /* APT DETAIL */
-.apt-detail-header { background: var(--charcoal); border-radius: 16px; padding: 26px 30px; color: white; margin-bottom: 22px; position: relative; overflow: hidden; }
-.apt-detail-header::before { content: ''; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%; background: rgba(201,169,110,0.1); }
-.apt-detail-name { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 4px; }
-.apt-detail-address { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
-.apt-detail-meta { display: flex; gap: 22px; flex-wrap: wrap; }
-.apt-detail-meta-item { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
-.apt-detail-meta-item strong { color: white; display: block; font-size: 1rem; }
-
-/* TEMPLATE BOX */
-.template-box { background: white; border: 1.5px solid var(--light-brown); border-radius: 12px; padding: 18px; margin-bottom: 12px; }
-.template-box:hover { border-color: var(--gold); }
-.template-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
-.template-label { font-size: 0.73rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); }
-.template-actions { display: flex; gap: 4px; flex-wrap: wrap; }
-.template-content { font-size: 0.85rem; color: var(--text-muted); line-height: 1.7; white-space: pre-wrap; font-style: italic; }
-.copy-btn { font-size: 0.7rem; padding: 4px 9px; background: var(--light-brown); border: 1px solid var(--mid-brown); border-radius: 6px; cursor: pointer; color: var(--brown); transition: all 0.2s; }
-.copy-btn:hover { background: var(--terracotta); color: white; border-color: var(--terracotta); }
+.apt-detail-header { background: var(--charcoal); border-radius: 16px; padding: 22px 26px; color: white; margin-bottom: 18px; position: relative; overflow: hidden; }
+.apt-detail-header::before { content:''; position:absolute; right:-40px; top:-40px; width:160px; height:160px; border-radius:50%; background:rgba(201,169,110,0.1); }
+.apt-detail-name { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 3px; }
+.apt-detail-address { font-size: 0.82rem; color: rgba(255,255,255,0.6); margin-bottom: 14px; }
+.apt-detail-meta { display: flex; gap: 18px; flex-wrap: wrap; }
+.apt-detail-meta-item { font-size: 0.78rem; color: rgba(255,255,255,0.7); }
+.apt-detail-meta-item strong { color: white; display: block; font-size: 0.95rem; }
 
 /* CANDIDATE */
-.candidate-item { background: white; border: 1.5px solid var(--light-brown); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; transition: all 0.2s; }
-.candidate-item:hover { border-color: var(--mid-brown); }
-.candidate-row { display: flex; align-items: center; gap: 12px; }
-.candidate-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--light-brown); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 1rem; color: var(--brown); flex-shrink: 0; }
+.candidate-item { background: white; border: 1.5px solid var(--light-brown); border-radius: 12px; padding: 12px 14px; margin-bottom: 7px; transition: all 0.2s; }
+.candidate-row { display: flex; align-items: center; gap: 10px; }
+.candidate-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--light-brown); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 0.95rem; color: var(--brown); flex-shrink: 0; }
 .candidate-info { flex: 1; min-width: 0; }
-.candidate-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
-.candidate-detail { font-size: 0.74rem; color: var(--text-muted); }
-.candidate-actions { display: flex; gap: 3px; flex-shrink: 0; }
+.candidate-name { font-weight: 600; font-size: 0.86rem; margin-bottom: 1px; }
+.candidate-detail { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.candidate-actions { display: flex; gap: 2px; flex-shrink: 0; }
 
-/* STATUT CANDIDAT PIPELINE */
-.pipeline { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-.pipeline-step { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; cursor: pointer; border: 1.5px solid; transition: all 0.2s; }
-.pipeline-step.done { opacity: 1; }
+/* PIPELINE */
+.pipeline { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.pipeline-step { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 0.67rem; font-weight: 600; cursor: pointer; border: 1.5px solid; transition: all 0.2s; user-select: none; }
 .pipeline-step.todo { opacity: 0.4; }
 .pipeline-step:hover { opacity: 1; }
 .ps-contact { border-color: #2980B9; color: #2980B9; background: #E8F4FD; }
@@ -168,138 +219,143 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .ps-fiche-recue.done { background: #8E44AD; color: white; }
 .ps-rdv { border-color: #27AE60; color: #27AE60; background: #E9F7EF; }
 .ps-rdv.done { background: #27AE60; color: white; }
+.ps-retenu { border-color: #1A8F5A; color: #1A8F5A; background: #D5F5E3; }
+.ps-retenu.done { background: #1A8F5A; color: white; }
 .ps-refuse { border-color: #E74C3C; color: #E74C3C; background: #FDEDEC; }
 .ps-refuse.done { background: #E74C3C; color: white; }
 
 /* EMAIL */
-.email-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-.email-search { flex: 1; min-width: 180px; padding: 8px 13px; border: 1.5px solid var(--mid-brown); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; outline: none; background: white; }
+.email-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.email-search { flex: 1; min-width: 140px; padding: 8px 12px; border: 1.5px solid var(--mid-brown); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; outline: none; background: white; -webkit-appearance: none; }
 .email-search:focus { border-color: var(--terracotta); }
-.email-item { background: white; border: 1.5px solid var(--light-brown); border-radius: 12px; padding: 14px 18px; margin-bottom: 7px; cursor: pointer; transition: all 0.2s; display: flex; gap: 12px; align-items: flex-start; }
-.email-item:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.email-item { background: white; border: 1.5px solid var(--light-brown); border-radius: 12px; padding: 12px 16px; margin-bottom: 6px; cursor: pointer; transition: all 0.2s; display: flex; gap: 10px; align-items: flex-start; }
+.email-item:hover { border-color: var(--gold); }
+.email-item:active { background: var(--light-brown); }
 .email-item.unread { border-left: 3px solid var(--terracotta); }
 .email-item.unread .email-subject { font-weight: 700; }
-.email-item.selected { background: rgba(201,169,110,0.1); border-color: var(--gold); }
-.email-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--light-brown); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 0.95rem; color: var(--brown); flex-shrink: 0; }
+.email-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--light-brown); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 0.9rem; color: var(--brown); flex-shrink: 0; }
 .email-content { flex: 1; min-width: 0; }
-.email-from { font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; }
-.email-subject { font-size: 0.83rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.email-preview { font-size: 0.76rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.email-from { font-size: 0.78rem; font-weight: 600; margin-bottom: 1px; }
+.email-subject { font-size: 0.8rem; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.email-preview { font-size: 0.73rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .email-meta { text-align: right; flex-shrink: 0; }
-.email-date { font-size: 0.7rem; color: var(--text-muted); }
-.email-apt-tag { font-size: 0.63rem; padding: 2px 6px; border-radius: 10px; background: rgba(201,169,110,0.2); color: var(--brown); margin-top: 3px; display: inline-block; }
+.email-date { font-size: 0.68rem; color: var(--text-muted); }
+.email-apt-tag { font-size: 0.6rem; padding: 2px 5px; border-radius: 8px; background: rgba(201,169,110,0.2); color: var(--brown); margin-top: 2px; display: inline-block; }
 
-/* EMAIL DETAIL */
-.email-detail { background: white; border: 1.5px solid var(--light-brown); border-radius: 14px; padding: 26px; }
-.email-detail-header { border-bottom: 1px solid var(--light-brown); padding-bottom: 16px; margin-bottom: 18px; }
-.email-detail-subject { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin-bottom: 8px; }
-.email-detail-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 10px; }
-.email-detail-body { font-size: 0.88rem; line-height: 1.8; white-space: pre-wrap; }
-.email-detail-actions { display: flex; gap: 7px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--light-brown); flex-wrap: wrap; }
+.email-detail { background: white; border: 1.5px solid var(--light-brown); border-radius: 14px; padding: 20px; }
+.email-detail-header { border-bottom: 1px solid var(--light-brown); padding-bottom: 14px; margin-bottom: 16px; }
+.email-detail-subject { font-family: 'DM Serif Display', serif; font-size: 1.15rem; margin-bottom: 6px; }
+.email-detail-meta { font-size: 0.78rem; color: var(--text-muted); }
+.email-detail-body { font-size: 0.86rem; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+.email-detail-actions { display: flex; gap: 6px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--light-brown); flex-wrap: wrap; }
+
+/* FOLDER PILLS */
+.folder-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+.folder-pill { padding: 5px 10px; border-radius: 20px; font-size: 0.74rem; cursor: pointer; border: 1.5px solid var(--mid-brown); color: var(--text-muted); transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+.folder-pill.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
 
 /* COMPOSE */
-.compose-box { background: white; border: 1.5px solid var(--light-brown); border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
-.compose-header { background: var(--charcoal); color: white; padding: 13px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 0.86rem; font-weight: 600; }
-.compose-body { padding: 18px; }
-.compose-field { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--light-brown); padding: 7px 0; }
-.compose-field label { font-size: 0.76rem; color: var(--text-muted); width: 50px; flex-shrink: 0; }
-.compose-field input { flex: 1; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; }
-.compose-textarea { width: 100%; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; min-height: 180px; resize: vertical; padding: 12px 0; line-height: 1.7; }
-.compose-footer { padding: 10px 18px; border-top: 1px solid var(--light-brown); display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+.compose-box { background: white; border: 1.5px solid var(--light-brown); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.compose-header { background: var(--charcoal); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; font-weight: 600; }
+.compose-body { padding: 16px; }
+.compose-field { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--light-brown); padding: 7px 0; }
+.compose-field label { font-size: 0.74rem; color: var(--text-muted); width: 45px; flex-shrink: 0; }
+.compose-field input { flex: 1; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; background: transparent; }
+.compose-textarea { width: 100%; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; min-height: 160px; resize: vertical; padding: 10px 0; line-height: 1.7; }
+.compose-footer { padding: 8px 16px; border-top: 1px solid var(--light-brown); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
 /* CONTACT DROPDOWN */
 .contact-dropdown { position: relative; flex: 1; }
 .contact-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1.5px solid var(--mid-brown); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100; max-height: 200px; overflow-y: auto; }
-.contact-item { padding: 8px 14px; cursor: pointer; font-size: 0.84rem; display: flex; justify-content: space-between; }
-.contact-item:hover { background: var(--light-brown); }
-.contact-item .contact-email { font-size: 0.72rem; color: var(--text-muted); }
+.contact-item { padding: 8px 12px; cursor: pointer; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; }
+.contact-item:hover, .contact-item:active { background: var(--light-brown); }
+.contact-email { font-size: 0.7rem; color: var(--text-muted); }
 
-/* ANNONCE LEBONCOIN */
-.annonce-grid { display: grid; gap: 12px; }
-.annonce-field { background: white; border: 1.5px solid var(--light-brown); border-radius: 10px; padding: 14px 16px; }
-.annonce-field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.annonce-field-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); }
-.annonce-field-value { font-size: 0.88rem; color: var(--charcoal); line-height: 1.6; }
-.annonce-field textarea, .annonce-field input, .annonce-field select { width: 100%; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; resize: none; background: transparent; }
-.copy-all-btn { display: flex; align-items: center; gap: 6px; padding: 10px 18px; background: var(--charcoal); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 600; transition: all 0.2s; }
+/* ANNONCE */
+.annonce-grid { display: grid; gap: 10px; }
+.annonce-field { background: white; border: 1.5px solid var(--light-brown); border-radius: 10px; padding: 12px 14px; }
+.annonce-field:hover { border-color: var(--mid-brown); }
+.annonce-field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.annonce-field-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); }
+.annonce-field textarea, .annonce-field input { width: 100%; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; resize: none; background: transparent; }
+.copy-all-btn { display: flex; align-items: center; gap: 6px; padding: 9px 14px; background: var(--charcoal); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; }
 .copy-all-btn:hover { background: var(--brown); }
+.copy-btn { font-size: 0.68rem; padding: 3px 8px; background: var(--light-brown); border: 1px solid var(--mid-brown); border-radius: 5px; cursor: pointer; color: var(--brown); transition: all 0.2s; }
+.copy-btn:hover, .copy-btn:active { background: var(--terracotta); color: white; border-color: var(--terracotta); }
 
-/* PHOTO GRID */
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; }
+/* TEMPLATE */
+.template-box { background: white; border: 1.5px solid var(--light-brown); border-radius: 12px; padding: 16px; margin-bottom: 10px; }
+.template-box:hover { border-color: var(--gold); }
+.template-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+.template-label { font-size: 0.71rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); }
+.template-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.template-content { font-size: 0.83rem; color: var(--text-muted); line-height: 1.7; white-space: pre-wrap; font-style: italic; }
+
+/* PHOTO */
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 7px; margin-bottom: 10px; }
 .photo-thumb { aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--light-brown); position: relative; }
 .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .photo-thumb:hover .photo-delete { opacity: 1; }
-.photo-delete { position: absolute; top: 4px; right: 4px; background: rgba(44,40,37,0.8); color: white; border: none; border-radius: 4px; padding: 2px 5px; cursor: pointer; font-size: 0.65rem; opacity: 0; transition: opacity 0.2s; }
-.photo-add { aspect-ratio: 1; border-radius: 8px; border: 2px dashed var(--mid-brown); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.7rem; }
-.photo-add:hover { border-color: var(--terracotta); color: var(--terracotta); }
-.photo-add .plus { font-size: 1.5rem; line-height: 1; }
+.photo-delete { position: absolute; top: 3px; right: 3px; background: rgba(44,40,37,0.8); color: white; border: none; border-radius: 4px; padding: 2px 5px; cursor: pointer; font-size: 0.6rem; opacity: 0; transition: opacity 0.2s; }
+.photo-add { aspect-ratio: 1; border-radius: 8px; border: 2px dashed var(--mid-brown); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.67rem; }
+.photo-add:hover, .photo-add:active { border-color: var(--terracotta); color: var(--terracotta); }
+.photo-add .plus { font-size: 1.4rem; line-height: 1; }
 
 /* FICHE */
-.fiche-preview { background: white; border: 2px solid var(--light-brown); border-radius: 12px; padding: 26px; font-size: 0.86rem; line-height: 1.8; }
-.fiche-preview h3 { font-family: 'DM Serif Display', serif; font-size: 1.15rem; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-brown); }
-.fiche-field { display: flex; gap: 8px; margin-bottom: 7px; align-items: flex-end; }
-.fiche-field label { font-weight: 600; color: var(--brown); min-width: 155px; flex-shrink: 0; font-size: 0.78rem; }
-.fiche-field .fiche-line { flex: 1; border-bottom: 1px solid var(--mid-brown); min-height: 22px; }
-.fiche-section-title { font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.68rem; color: var(--text-muted); margin: 16px 0 8px; padding-top: 10px; border-top: 1px solid var(--light-brown); }
+.fiche-preview { background: white; border: 2px solid var(--light-brown); border-radius: 12px; padding: 22px; font-size: 0.84rem; line-height: 1.8; }
+.fiche-preview h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--light-brown); }
+.fiche-field { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-end; }
+.fiche-field label { font-weight: 600; color: var(--brown); min-width: 145px; flex-shrink: 0; font-size: 0.76rem; }
+.fiche-field .fiche-line { flex: 1; border-bottom: 1px solid var(--mid-brown); min-height: 20px; }
+.fiche-section-title { font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.66rem; color: var(--text-muted); margin: 14px 0 7px; padding-top: 9px; border-top: 1px solid var(--light-brown); }
 
-/* GMAIL BANNERS */
-.gmail-connect-banner { background: white; border: 2px dashed var(--mid-brown); border-radius: 16px; padding: 36px; text-align: center; margin-bottom: 20px; }
-.gmail-connect-banner .big-icon { font-size: 2.8rem; display: block; margin-bottom: 10px; }
-.gmail-connect-banner h3 { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin-bottom: 7px; }
-.gmail-connect-banner p { color: var(--text-muted); font-size: 0.86rem; margin-bottom: 18px; }
+/* SYNC STATUS */
+.sync-bar { display: flex; align-items: center; gap: 8px; font-size: 0.76rem; color: var(--text-muted); margin-bottom: 14px; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; }
+.sync-dot.syncing { background: var(--gold); animation: pulse 1s infinite; }
+.sync-dot.synced { background: var(--sage); }
+.sync-dot.error { background: var(--gmail-red); }
 
-/* FOLDER PILLS */
-.folder-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-.folder-pill { padding: 5px 12px; border-radius: 20px; font-size: 0.76rem; cursor: pointer; border: 1.5px solid var(--mid-brown); color: var(--text-muted); transition: all 0.2s; }
-.folder-pill:hover { border-color: var(--brown); color: var(--brown); }
-.folder-pill.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
-
-/* SETTINGS */
-.setup-step { display: flex; gap: 14px; margin-bottom: 20px; }
-.step-number { width: 30px; height: 30px; border-radius: 50%; background: var(--terracotta); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.84rem; flex-shrink: 0; margin-top: 2px; }
-.step-content h4 { font-weight: 600; margin-bottom: 3px; font-size: 0.9rem; }
-.step-content p { font-size: 0.81rem; color: var(--text-muted); line-height: 1.6; }
-.step-content a { color: var(--terracotta); }
-.step-content code { background: var(--light-brown); padding: 1px 5px; border-radius: 4px; font-size: 0.78rem; font-family: monospace; }
-.info-box { background: rgba(201,169,110,0.12); border: 1px solid rgba(201,169,110,0.4); border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; font-size: 0.82rem; color: var(--brown); }
-
-/* LOADING / EMPTY */
-.loading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 30px; color: var(--text-muted); font-size: 0.86rem; }
-.spinner { width: 18px; height: 18px; border: 2px solid var(--light-brown); border-top-color: var(--terracotta); border-radius: 50%; animation: spin 0.8s linear infinite; }
+/* LOADING */
+.loading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 28px; color: var(--text-muted); font-size: 0.84rem; }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--light-brown); border-top-color: var(--terracotta); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
-.empty-state .big-icon { font-size: 2.6rem; display: block; margin-bottom: 10px; }
-.empty-state p { margin-bottom: 14px; font-size: 0.86rem; }
+.empty-state { text-align: center; padding: 32px 16px; color: var(--text-muted); }
+.empty-state .big-icon { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+.empty-state p { margin-bottom: 12px; font-size: 0.84rem; }
+
+.gmail-connect-banner { background: white; border: 2px dashed var(--mid-brown); border-radius: 16px; padding: 30px; text-align: center; margin-bottom: 16px; }
+.gmail-connect-banner .big-icon { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+.gmail-connect-banner h3 { font-family: 'DM Serif Display', serif; font-size: 1.15rem; margin-bottom: 6px; }
+.gmail-connect-banner p { color: var(--text-muted); font-size: 0.84rem; margin-bottom: 16px; }
 
 /* TOAST */
-.toast { position: fixed; bottom: 22px; right: 22px; background: var(--charcoal); color: white; padding: 11px 18px; border-radius: 10px; font-size: 0.83rem; z-index: 9999; transform: translateY(60px); opacity: 0; transition: all 0.3s ease; pointer-events: none; max-width: 300px; }
-.toast.show { transform: translateY(0); opacity: 1; }
+.toast { position: fixed; bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--charcoal); color: white; padding: 10px 16px; border-radius: 10px; font-size: 0.82rem; z-index: 9999; opacity: 0; transition: all 0.3s ease; pointer-events: none; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .toast.error { background: #C62828; }
 .toast.success { background: var(--sage); }
+@media (min-width: 769px) { .toast { bottom: 20px; } }
 
-/* EMAIL ACTIONS BAR */
-.email-actions-bar { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
-.email-bulk-check { margin-right: 4px; }
+/* SETUP */
+.setup-step { display: flex; gap: 12px; margin-bottom: 18px; }
+.step-number { width: 28px; height: 28px; border-radius: 50%; background: var(--terracotta); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.82rem; flex-shrink: 0; margin-top: 2px; }
+.step-content h4 { font-weight: 600; margin-bottom: 2px; font-size: 0.88rem; }
+.step-content p { font-size: 0.79rem; color: var(--text-muted); line-height: 1.6; }
+.step-content a { color: var(--terracotta); }
+.step-content code { background: var(--light-brown); padding: 1px 5px; border-radius: 4px; font-size: 0.76rem; font-family: monospace; }
+.info-box { background: rgba(201,169,110,0.12); border: 1px solid rgba(201,169,110,0.4); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.8rem; color: var(--brown); }
 
 @media print {
-  .sidebar, .page-header .btn, .back-btn, .modal-overlay, .toast { display: none !important; }
+  .sidebar, .mobile-nav, .mobile-header, .page-header .btn, .back-btn, .modal-overlay, .toast { display: none !important; }
   .main { padding: 0; }
-  .fiche-preview { border: none; box-shadow: none; }
-}
-
-@media (max-width: 768px) {
-  .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; padding: 10px 0; overflow-x: auto; }
-  .sidebar-logo, .sidebar-footer, .gmail-status, .nav-label { display: none; }
-  .sidebar-nav { display: flex; flex-direction: row; padding: 0 10px; flex: unset; white-space: nowrap; }
-  .stats-bar { grid-template-columns: repeat(2, 1fr); }
-  .form-row, .form-row-3 { grid-template-columns: 1fr; }
-  .main { padding: 18px 14px; }
+  .fiche-preview { border: none; }
 }
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- SIDEBAR -->
+
+  <!-- SIDEBAR (desktop) -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <h1>Mes<br>Locations</h1>
@@ -307,7 +363,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     </div>
     <div class="gmail-status disconnected" id="gmail-status-indicator" onclick="showPage('settings')">
       <span class="dot"></span>
-      <div><div id="gmail-status-text">Gmail non connecté</div><span class="gmail-email" id="gmail-status-email">Cliquer pour configurer</span></div>
+      <div><div id="gmail-status-text">Gmail non connecté</div><span class="gmail-email" id="gmail-status-email">Configurer →</span></div>
+    </div>
+    <div class="airtable-status disconnected" id="airtable-status-indicator" onclick="showPage('settings')">
+      <span class="dot"></span>
+      <div id="airtable-status-text">Airtable non connecté</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-label">Navigation</div>
@@ -321,8 +381,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <div class="nav-item" onclick="showPage('fiche')"><span class="icon">📋</span> Fiche pré-visite</div>
       <div class="nav-item" onclick="showPage('settings')"><span class="icon">⚙️</span> Paramètres</div>
     </nav>
-    <div class="sidebar-footer" id="sidebar-footer">4 appartements · 0 candidats</div>
+    <div class="sidebar-footer" id="sidebar-footer">4 appartements</div>
   </aside>
+
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header">
+    <div class="mobile-header-inner">
+      <h2 id="mobile-title">🏠 Accueil</h2>
+      <div class="mobile-header-right">
+        <div id="gmail-dot-mobile" style="width:8px;height:8px;border-radius:50%;background:var(--gmail-red)"></div>
+        <div id="airtable-dot-mobile" style="width:8px;height:8px;border-radius:50%;background:var(--text-muted)"></div>
+      </div>
+    </div>
+  </div>
 
   <main class="main">
 
@@ -330,9 +401,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div class="page active" id="page-dashboard">
       <div class="page-header">
         <div><h2 class="page-title">Tableau de <span>bord</span></h2><p class="page-subtitle" id="dash-date"></p></div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-apt')">+ Appartement</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddApt()">+ Appart</button>
       </div>
       <div class="stats-bar" id="stats-bar"></div>
+      <div id="sync-bar-dash"></div>
       <div class="section">
         <div class="section-header"><h3 class="section-title">🏘 Vos appartements</h3></div>
         <div class="cards-grid" id="dashboard-cards"></div>
@@ -342,8 +414,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <!-- APPARTEMENTS -->
     <div class="page" id="page-appartements">
       <div class="page-header">
-        <div><h2 class="page-title">Mes <span>appartements</span></h2><p class="page-subtitle">Gérer vos biens et candidats</p></div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-apt')">+ Ajouter</button>
+        <div><h2 class="page-title">Mes <span>appartements</span></h2></div>
+        <button class="btn btn-primary btn-sm" onclick="openAddApt()">+ Ajouter</button>
       </div>
       <div class="cards-grid" id="apts-list-cards"></div>
     </div>
@@ -357,10 +429,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <!-- GMAIL -->
     <div class="page" id="page-gmail">
       <div class="page-header">
-        <div><h2 class="page-title">Boîte de <span>réception</span></h2><p class="page-subtitle" id="inbox-subtitle">Emails de votre adresse dédiée</p></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-secondary" onclick="loadInbox()">↻ Actualiser</button>
-          <button class="btn btn-gmail" onclick="showPage('compose')">✍️ Nouveau</button>
+        <div><h2 class="page-title">Boîte de <span>réception</span></h2></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="loadInbox()">↻</button>
+          <button class="btn btn-gmail btn-sm" onclick="showPage('compose')">✍️</button>
         </div>
       </div>
       <div id="gmail-page-content"></div>
@@ -368,23 +440,21 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
     <!-- EMAIL DETAIL -->
     <div class="page" id="page-email-detail">
-      <button class="back-btn" onclick="showPage('gmail')">← Boîte de réception</button>
+      <button class="back-btn" onclick="showPage('gmail')">← Retour</button>
       <div id="email-detail-content"></div>
     </div>
 
     <!-- COMPOSE -->
     <div class="page" id="page-compose">
-      <div class="page-header">
-        <div><h2 class="page-title">Nouveau <span>message</span></h2><p class="page-subtitle">Depuis votre adresse dédiée</p></div>
-      </div>
+      <div class="page-header"><div><h2 class="page-title">Nouveau <span>message</span></h2></div></div>
       <div id="compose-content"></div>
     </div>
 
     <!-- MESSAGES -->
     <div class="page" id="page-messages">
       <div class="page-header">
-        <div><h2 class="page-title">Messages <span>types</span></h2><p class="page-subtitle">Modèles prêts à l'emploi</p></div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-msg')">+ Ajouter</button>
+        <div><h2 class="page-title">Messages <span>types</span></h2></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-msg')">+ Ajouter</button>
       </div>
       <div id="messages-list"></div>
     </div>
@@ -392,10 +462,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <!-- FICHE -->
     <div class="page" id="page-fiche">
       <div class="page-header">
-        <div><h2 class="page-title">Fiche <span>pré-visite</span></h2><p class="page-subtitle">Formulaire à envoyer aux candidats</p></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer</button>
-          <button class="btn btn-primary" onclick="downloadFichePDF()">⬇ PDF</button>
+        <div><h2 class="page-title">Fiche <span>pré-visite</span></h2></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨</button>
+          <button class="btn btn-primary btn-sm" onclick="downloadFichePDF()">⬇ PDF</button>
         </div>
       </div>
       <div class="fiche-preview" id="fiche-content"></div>
@@ -403,40 +473,58 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
-      <div class="page-header">
-        <div><h2 class="page-title"><span>Paramètres</span> Gmail</h2><p class="page-subtitle">Configuration de votre boîte mail dédiée</p></div>
-      </div>
+      <div class="page-header"><div><h2 class="page-title"><span>Paramètres</span></h2></div></div>
       <div id="settings-content"></div>
     </div>
 
   </main>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-items">
+      <button class="mobile-nav-item active" onclick="showPage('dashboard')" id="mnav-dashboard">
+        <span class="m-icon">🏠</span><span>Accueil</span>
+      </button>
+      <button class="mobile-nav-item" onclick="showPage('appartements')" id="mnav-appartements">
+        <span class="m-icon">🔑</span><span>Apparts</span>
+      </button>
+      <button class="mobile-nav-item" onclick="showPage('gmail')" id="mnav-gmail">
+        <span class="mobile-nav-badge" id="gmail-mobile-badge"><span class="m-icon">📧</span></span><span>Emails</span>
+      </button>
+      <button class="mobile-nav-item" onclick="showPage('compose')" id="mnav-compose">
+        <span class="m-icon">✍️</span><span>Écrire</span>
+      </button>
+      <button class="mobile-nav-item" onclick="showPage('settings')" id="mnav-settings">
+        <span class="m-icon">⚙️</span><span>Réglages</span>
+      </button>
+    </div>
+  </nav>
 </div>
 
 <!-- MODALS -->
 
-<!-- Add/Edit Apartment -->
 <div class="modal-overlay" id="modal-add-apt">
   <div class="modal">
-    <div class="modal-header"><h3 class="modal-title" id="modal-apt-title">Nouvel appartement</h3><button class="btn-icon" onclick="closeModal('modal-add-apt')">✕</button></div>
+    <div class="modal-header"><h3 class="modal-title" id="modal-apt-title">Appartement</h3><button class="btn-icon" onclick="closeModal('modal-add-apt')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-apt-id">
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Nom / Référence</label><input type="text" class="form-input" id="new-apt-name" placeholder="ex: T2 Centre Lyon"></div>
+        <div class="form-group"><label class="form-label">Nom / Référence</label><input type="text" class="form-input" id="new-apt-name" placeholder="T2 Centre Lyon"></div>
         <div class="form-group"><label class="form-label">Statut</label><select class="form-select" id="new-apt-status"><option value="disponible">Disponible</option><option value="en-cours">En cours</option><option value="loue">Loué</option></select></div>
       </div>
-      <div class="form-group"><label class="form-label">Adresse complète</label><input type="text" class="form-input" id="new-apt-address" placeholder="12 rue de la Paix, Lyon 69001"></div>
+      <div class="form-group"><label class="form-label">Adresse</label><input type="text" class="form-input" id="new-apt-address" placeholder="12 rue de la Paix, Lyon"></div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Loyer CC (€/mois)</label><input type="number" class="form-input" id="new-apt-price" placeholder="850"></div>
-        <div class="form-group"><label class="form-label">Charges (€/mois)</label><input type="number" class="form-input" id="new-apt-charges" placeholder="50"></div>
+        <div class="form-group"><label class="form-label">Loyer CC (€)</label><input type="number" class="form-input" id="new-apt-price"></div>
+        <div class="form-group"><label class="form-label">Charges (€)</label><input type="number" class="form-input" id="new-apt-charges"></div>
       </div>
       <div class="form-row-3">
-        <div class="form-group"><label class="form-label">Surface (m²)</label><input type="number" class="form-input" id="new-apt-surface" placeholder="42"></div>
-        <div class="form-group"><label class="form-label">Pièces</label><input type="number" class="form-input" id="new-apt-rooms" placeholder="2" min="1"></div>
-        <div class="form-group"><label class="form-label">Étage</label><input type="text" class="form-input" id="new-apt-floor" placeholder="3ème"></div>
+        <div class="form-group"><label class="form-label">Surface m²</label><input type="number" class="form-input" id="new-apt-surface"></div>
+        <div class="form-group"><label class="form-label">Pièces</label><input type="number" class="form-input" id="new-apt-rooms" min="1"></div>
+        <div class="form-group"><label class="form-label">Étage</label><input type="text" class="form-input" id="new-apt-floor"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">DPE (A→G)</label><select class="form-select" id="new-apt-dpe"><option value="">-</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
-        <div class="form-group"><label class="form-label">GES (A→G)</label><select class="form-select" id="new-apt-ges"><option value="">-</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+        <div class="form-group"><label class="form-label">DPE</label><select class="form-select" id="new-apt-dpe"><option value="">-</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+        <div class="form-group"><label class="form-label">GES</label><select class="form-select" id="new-apt-ges"><option value="">-</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -446,25 +534,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 </div>
 
-<!-- Add Candidate -->
 <div class="modal-overlay" id="modal-add-candidate">
   <div class="modal">
     <div class="modal-header"><h3 class="modal-title">Ajouter un candidat</h3><button class="btn-icon" onclick="closeModal('modal-add-candidate')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Appartement concerné</label><select class="form-select" id="new-cand-apt-id"></select></div>
+      <div class="form-group"><label class="form-label">Appartement</label><select class="form-select" id="new-cand-apt-id"></select></div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Prénom</label><input type="text" class="form-input" id="new-cand-prenom" placeholder="Marie"></div>
-        <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="new-cand-nom" placeholder="Dupont"></div>
+        <div class="form-group"><label class="form-label">Prénom</label><input type="text" class="form-input" id="new-cand-prenom"></div>
+        <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="new-cand-nom"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" id="new-cand-phone" placeholder="06 XX XX XX XX"></div>
-        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="new-cand-email" placeholder="email@exemple.fr"></div>
+        <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" id="new-cand-phone"></div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="new-cand-email"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Situation professionnelle</label><input type="text" class="form-input" id="new-cand-job" placeholder="CDI – Ingénieur"></div>
-        <div class="form-group"><label class="form-label">Revenus nets/mois (€)</label><input type="number" class="form-input" id="new-cand-income" placeholder="2500"></div>
+        <div class="form-group"><label class="form-label">Situation pro</label><input type="text" class="form-input" id="new-cand-job" placeholder="CDI, fonctionnaire…"></div>
+        <div class="form-group"><label class="form-label">Revenus (€/mois)</label><input type="number" class="form-input" id="new-cand-income"></div>
       </div>
-      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="new-cand-notes" style="min-height:65px" placeholder="Impressions, informations complémentaires…"></textarea></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="new-cand-notes" style="min-height:60px"></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-candidate')">Annuler</button>
@@ -473,13 +560,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 </div>
 
-<!-- Add Message -->
 <div class="modal-overlay" id="modal-add-msg">
   <div class="modal">
     <div class="modal-header"><h3 class="modal-title">Nouveau message type</h3><button class="btn-icon" onclick="closeModal('modal-add-msg')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="new-msg-title" placeholder="ex: Premier contact"></div>
-      <div class="form-group"><label class="form-label">Contenu</label><textarea class="form-textarea" id="new-msg-content" style="min-height:150px" placeholder="Bonjour,…"></textarea></div>
+      <div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="new-msg-title"></div>
+      <div class="form-group"><label class="form-label">Contenu</label><textarea class="form-textarea" id="new-msg-content" style="min-height:140px"></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-msg')">Annuler</button>
@@ -488,12 +574,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 </div>
 
-<!-- Candidate from email -->
 <div class="modal-overlay" id="modal-cand-from-email">
   <div class="modal">
     <div class="modal-header"><h3 class="modal-title">➕ Ajouter comme candidat</h3><button class="btn-icon" onclick="closeModal('modal-cand-from-email')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Appartement concerné</label><select class="form-select" id="cfe-apt-id"></select></div>
+      <div class="form-group"><label class="form-label">Appartement</label><select class="form-select" id="cfe-apt-id"></select></div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Prénom</label><input type="text" class="form-input" id="cfe-prenom"></div>
         <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="cfe-nom"></div>
@@ -503,25 +588,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         <div class="form-group"><label class="form-label">Email <small style="color:var(--text-muted)">(auto)</small></label><input type="email" class="form-input" id="cfe-email" readonly style="background:var(--light-brown)"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Situation pro</label><input type="text" class="form-input" id="cfe-job" placeholder="CDI, fonctionnaire…"></div>
+        <div class="form-group"><label class="form-label">Situation pro</label><input type="text" class="form-input" id="cfe-job"></div>
         <div class="form-group"><label class="form-label">Revenus (€/mois)</label><input type="number" class="form-input" id="cfe-income"></div>
       </div>
-      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="cfe-notes" style="min-height:60px"></textarea></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="cfe-notes" style="min-height:55px"></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-cand-from-email')">Annuler</button>
-      <button class="btn btn-primary" onclick="saveCandidateFromEmail()">Ajouter le candidat</button>
+      <button class="btn btn-primary" onclick="saveCandidateFromEmail()">Ajouter</button>
     </div>
   </div>
 </div>
 
-<!-- Move to folder -->
 <div class="modal-overlay" id="modal-folder">
-  <div class="modal" style="max-width:400px">
+  <div class="modal" style="max-width:380px">
     <div class="modal-header"><h3 class="modal-title">📁 Déplacer vers…</h3><button class="btn-icon" onclick="closeModal('modal-folder')">✕</button></div>
     <div class="modal-body">
       <div id="folder-list-modal"></div>
-      <div style="margin-top:14px;display:flex;gap:8px">
+      <div style="display:flex;gap:8px;margin-top:12px">
         <input type="text" class="form-input" id="new-folder-input" placeholder="Nouveau dossier…">
         <button class="btn btn-secondary btn-sm" onclick="createFolder()">Créer</button>
       </div>
@@ -537,73 +621,256 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 // =============================================
 let D = {
   apartments: [
-    { id: 1, name: "T2 Centre", address: "12 rue de la Paix, Lyon 69001", status: "disponible", price: 750, charges: 50, surface: 38, rooms: 2, floor: "2ème", dpe: "C", ges: "C",
-      annonce: { titre: "Beau T2 meublé centre-ville Lyon", resume: "Appartement lumineux, calme, tout équipé, proche transports", texte: "Bel appartement meublé T2 en plein centre-ville. Lumineux, calme, tout équipé. Proche transports et commerces. Idéal pour jeune actif ou couple. Loué meublé charges comprises.", equipements: "Cuisine équipée, lave-linge, TV, Internet", url: "" },
-      photos: [], candidates: [
-        { id: 1, prenom: "Sophie", nom: "Martin", phone: "06 12 34 56 78", email: "sophie.martin@gmail.com", job: "CDI – Infirmière", income: 2100, notes: "Sérieuse", pipeline: ["contact","fiche-envoyee"] },
-        { id: 2, prenom: "Thomas", nom: "Leroy", phone: "07 98 76 54 32", email: "t.leroy@outlook.fr", job: "CDD – Ingénieur", income: 2400, notes: "", pipeline: ["contact"] }
-      ]
+    { id:1, name:"T2 Centre", address:"12 rue de la Paix, Lyon 69001", status:"disponible", price:750, charges:50, surface:38, rooms:2, floor:"2ème", dpe:"C", ges:"C",
+      annonce:{titre:"Beau T2 meublé centre-ville Lyon",resume:"Appartement lumineux, calme, tout équipé",texte:"Bel appartement meublé T2 en plein centre-ville. Lumineux, calme, tout équipé. Proche transports et commerces.",equipements:"Cuisine équipée, lave-linge, TV, Internet",url:""},
+      photos:[], candidates:[
+        {id:1,prenom:"Sophie",nom:"Martin",phone:"06 12 34 56 78",email:"sophie.martin@gmail.com",job:"CDI – Infirmière",income:2100,notes:"Sérieuse",pipeline:["contact","fiche-envoyee"],airtableId:null},
+        {id:2,prenom:"Thomas",nom:"Leroy",phone:"07 98 76 54 32",email:"t.leroy@outlook.fr",job:"CDD – Ingénieur",income:2400,notes:"",pipeline:["contact"],airtableId:null}
+      ], airtableId:null
     },
-    { id: 2, name: "Studio Vieux-Lyon", address: "8 rue Saint-Jean, Lyon 69005", status: "loue", price: 620, charges: 30, surface: 25, rooms: 1, floor: "1er", dpe: "D", ges: "D",
-      annonce: { titre: "Studio meublé Vieux-Lyon UNESCO", resume: "Charme exceptionnel, pierres apparentes, poutres", texte: "Charmant studio meublé dans le Vieux-Lyon classé UNESCO. Pierres apparentes, poutres, tout confort.", equipements: "Cuisine équipée, TV, Internet", url: "" },
-      photos: [], candidates: []
+    { id:2, name:"Studio Vieux-Lyon", address:"8 rue Saint-Jean, Lyon 69005", status:"loue", price:620, charges:30, surface:25, rooms:1, floor:"1er", dpe:"D", ges:"D",
+      annonce:{titre:"Studio meublé Vieux-Lyon UNESCO",resume:"Charme exceptionnel, pierres apparentes",texte:"Charmant studio meublé dans le Vieux-Lyon classé UNESCO.",equipements:"Cuisine équipée, TV, Internet",url:""},
+      photos:[], candidates:[], airtableId:null
     },
-    { id: 3, name: "T3 Croix-Rousse", address: "45 bd de la Croix-Rousse, Lyon 69004", status: "en-cours", price: 980, charges: 80, surface: 62, rooms: 3, floor: "4ème", dpe: "B", ges: "B",
-      annonce: { titre: "Grand T3 meublé Croix-Rousse", resume: "Vue dégagée, parquet ancien, quartier vivant", texte: "Grand T3 meublé au cœur du quartier des canuts. Vue dégagée, parquet ancien, cuisine équipée.", equipements: "Cuisine équipée, lave-linge, lave-vaisselle, TV, Internet", url: "" },
-      photos: [], candidates: [
-        { id: 1, prenom: "Camille", nom: "Bernard", phone: "06 55 44 33 22", email: "c.bernard@pro.fr", job: "Fonctionnaire", income: 2800, notes: "Visite samedi 10h", pipeline: ["contact","fiche-envoyee","fiche-recue","rdv"] }
-      ]
+    { id:3, name:"T3 Croix-Rousse", address:"45 bd de la Croix-Rousse, Lyon 69004", status:"en-cours", price:980, charges:80, surface:62, rooms:3, floor:"4ème", dpe:"B", ges:"B",
+      annonce:{titre:"Grand T3 meublé Croix-Rousse",resume:"Vue dégagée, parquet ancien, quartier vivant",texte:"Grand T3 meublé au cœur du quartier des canuts.",equipements:"Cuisine équipée, lave-linge, lave-vaisselle, TV, Internet",url:""},
+      photos:[], candidates:[
+        {id:1,prenom:"Camille",nom:"Bernard",phone:"06 55 44 33 22",email:"c.bernard@pro.fr",job:"Fonctionnaire",income:2800,notes:"Visite samedi",pipeline:["contact","fiche-envoyee","fiche-recue","rdv"],airtableId:null}
+      ], airtableId:null
     },
-    { id: 4, name: "T2 Part-Dieu", address: "18 rue Garibaldi, Lyon 69003", status: "disponible", price: 820, charges: 60, surface: 42, rooms: 2, floor: "5ème", dpe: "C", ges: "C",
-      annonce: { titre: "T2 meublé moderne Part-Dieu", resume: "Proche gare, cuisine ouverte, ascenseur", texte: "T2 meublé moderne, proche gare Part-Dieu. Cuisine ouverte, double vitrage, ascenseur.", equipements: "Cuisine équipée, lave-linge, TV, Internet, parking possible", url: "" },
-      photos: [], candidates: []
+    { id:4, name:"T2 Part-Dieu", address:"18 rue Garibaldi, Lyon 69003", status:"disponible", price:820, charges:60, surface:42, rooms:2, floor:"5ème", dpe:"C", ges:"C",
+      annonce:{titre:"T2 meublé moderne Part-Dieu",resume:"Proche gare, cuisine ouverte, ascenseur",texte:"T2 meublé moderne, proche gare Part-Dieu.",equipements:"Cuisine équipée, lave-linge, TV, Internet",url:""},
+      photos:[], candidates:[], airtableId:null
     }
   ],
   messages: [
-    { id: 1, title: "Premier contact – Disponibilité", content: "Bonjour,\n\nL'appartement est disponible. Envoyez-moi votre e-mail par message sur mon téléphone portable et je vous ferai suivre une fiche à remplir pour définir d'une visite.\n\nIl est loué meublé.\n\nMerci." },
-    { id: 2, title: "Envoi de la fiche candidat", content: "Bonjour,\n\nSuite à votre prise de contact, veuillez trouver ci-joint la fiche à compléter afin que nous puissions planifier une visite.\n\nMerci de me la retourner complétée.\n\nCordialement." },
-    { id: 3, title: "Confirmation de visite", content: "Bonjour,\n\nJ'ai bien reçu votre dossier. Je vous propose une visite le [DATE] à [HEURE].\n\nAdresse : [ADRESSE].\n\nMerci de confirmer votre disponibilité.\n\nCordialement." },
-    { id: 4, title: "Suite négative", content: "Bonjour,\n\nJe vous remercie de l'intérêt porté à l'appartement.\n\nAprès étude des dossiers, je n'ai pas pu donner suite à votre candidature.\n\nBonne chance dans vos recherches.\n\nCordialement." }
+    {id:1,title:"Premier contact – Disponibilité",content:"Bonjour,\n\nL'appartement est disponible. Envoyez-moi votre e-mail par message et je vous ferai suivre une fiche à remplir.\n\nIl est loué meublé.\n\nMerci."},
+    {id:2,title:"Envoi de la fiche candidat",content:"Bonjour,\n\nSuite à votre prise de contact, veuillez trouver ci-joint la fiche à compléter afin que nous puissions planifier une visite.\n\nMerci de me la retourner complétée.\n\nCordialement."},
+    {id:3,title:"Confirmation de visite",content:"Bonjour,\n\nJe vous propose une visite le [DATE] à [HEURE].\n\nAdresse : [ADRESSE].\n\nMerci de confirmer votre disponibilité.\n\nCordialement."},
+    {id:4,title:"Suite négative",content:"Bonjour,\n\nJe vous remercie de l'intérêt porté à l'appartement.\n\nAprès étude des dossiers, je n'ai pas pu donner suite à votre candidature.\n\nBonne chance dans vos recherches.\n\nCordialement."}
   ],
-  folders: ["INBOX", "Candidats retenus", "Candidats refusés", "Archives"],
-  emailFolders: {}, // emailId -> folderName
-  gmail: { configured: false, clientId: '', email: '', accessToken: null },
+  folders: ["INBOX","Candidats retenus","Candidats refusés","Archives"],
+  emailFolders: {},
+  gmail: {configured:false,clientId:'',email:'',accessToken:null},
+  airtable: {configured:false,token:'',baseId:''},
   currentAptId: null,
-  currentEmailFrom: null,
-  currentEmailSubject: null,
   selectedEmails: []
 };
 
 function save() {
-  const s = { ...D, gmail: { ...D.gmail, accessToken: null } };
-  localStorage.setItem('mlv3', JSON.stringify(s));
+  const s = {...D, gmail:{...D.gmail,accessToken:null}};
+  try { localStorage.setItem('mlv4', JSON.stringify(s)); } catch(e) {}
 }
 function load() {
-  try {
-    const s = localStorage.getItem('mlv3');
-    if (s) D = { ...D, ...JSON.parse(s) };
-  } catch(e) {}
+  try { const s = localStorage.getItem('mlv4'); if(s) D = {...D,...JSON.parse(s)}; } catch(e) {}
 }
 load();
 
 // =============================================
+// AIRTABLE SYNC
+// =============================================
+const AT_BASE = 'https://api.airtable.com/v0';
+
+async function atFetch(path, method='GET', body=null) {
+  if (!D.airtable.configured) return null;
+  const opts = {
+    method,
+    headers: { 'Authorization': `Bearer ${D.airtable.token}`, 'Content-Type': 'application/json' }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${AT_BASE}/${D.airtable.baseId}/${path}`, opts);
+  if (!res.ok) throw new Error(`Airtable ${res.status}`);
+  return res.json();
+}
+
+async function syncFromAirtable() {
+  if (!D.airtable.configured) return;
+  showSyncStatus('syncing');
+  try {
+    // Sync apartments
+    const apts = await atFetch('Appartements');
+    if (apts && apts.records) {
+      apts.records.forEach(rec => {
+        const f = rec.fields;
+        const existing = D.apartments.find(a => a.airtableId === rec.id);
+        if (existing) {
+          existing.name = f.Nom || existing.name;
+          existing.address = f.Adresse || existing.address;
+          existing.status = f.Statut?.toLowerCase().replace(' ','-') || existing.status;
+          existing.price = f.Loyer || existing.price;
+          existing.charges = f.Charges || existing.charges;
+          existing.surface = f.Surface || existing.surface;
+          existing.rooms = f['Pièces'] || existing.rooms;
+          existing.floor = f['Étage'] || existing.floor;
+          existing.dpe = f.DPE || existing.dpe;
+        } else {
+          D.apartments.push({
+            id: Date.now() + Math.random(), airtableId: rec.id,
+            name: f.Nom||'', address: f.Adresse||'', status: (f.Statut||'disponible').toLowerCase().replace(' ','-'),
+            price: f.Loyer||0, charges: f.Charges||0, surface: f.Surface||0,
+            rooms: f['Pièces']||1, floor: f['Étage']||'', dpe: f.DPE||'', ges: '',
+            annonce:{titre:'',resume:'',texte:'',equipements:'',url:''}, photos:[], candidates:[]
+          });
+        }
+      });
+    }
+    // Sync candidates
+    const cands = await atFetch('Candidats');
+    if (cands && cands.records) {
+      cands.records.forEach(rec => {
+        const f = rec.fields;
+        const aptId = f.Appartement?.[0];
+        const apt = D.apartments.find(a => a.airtableId === aptId);
+        if (apt) {
+          const existing = apt.candidates.find(c => c.airtableId === rec.id);
+          if (existing) {
+            existing.prenom = f.Prénom || existing.prenom;
+            existing.nom = f.Nom || existing.nom;
+            existing.phone = f.Téléphone || existing.phone;
+            existing.email = f.Email || existing.email;
+            existing.job = f['Situation pro'] || existing.job;
+            existing.income = f.Revenus || existing.income;
+            existing.notes = f.Notes || existing.notes;
+            if (f.Pipeline) existing.pipeline = [f.Pipeline.toLowerCase().replace(' ','-').replace('è','e').replace('é','e')];
+          } else {
+            apt.candidates.push({
+              id: Date.now() + Math.random(), airtableId: rec.id,
+              prenom: f.Prénom||'', nom: f.Nom||'', phone: f.Téléphone||'',
+              email: f.Email||'', job: f['Situation pro']||'', income: f.Revenus||0,
+              notes: f.Notes||'', pipeline: ['contact']
+            });
+          }
+        }
+      });
+    }
+    save();
+    showSyncStatus('synced');
+    renderDashboard();
+    showToast('✅ Synchronisé avec Airtable', 'success');
+  } catch(e) {
+    showSyncStatus('error');
+    showToast('Erreur sync Airtable : ' + e.message, 'error');
+  }
+}
+
+async function pushApartmentToAirtable(apt) {
+  if (!D.airtable.configured) return;
+  const fields = {
+    'Nom': apt.name, 'Adresse': apt.address,
+    'Statut': apt.status === 'disponible' ? 'Disponible' : apt.status === 'loue' ? 'Loué' : 'En cours',
+    'Loyer': apt.price, 'Charges': apt.charges, 'Surface': apt.surface,
+    'Pièces': apt.rooms, 'Étage': apt.floor, 'DPE': apt.dpe
+  };
+  try {
+    if (apt.airtableId) {
+      await atFetch(`Appartements/${apt.airtableId}`, 'PATCH', {fields});
+    } else {
+      const res = await atFetch('Appartements', 'POST', {fields});
+      apt.airtableId = res.id;
+    }
+    save();
+  } catch(e) { showToast('Sync Airtable: ' + e.message, 'error'); }
+}
+
+async function pushCandidateToAirtable(cand, aptAirtableId) {
+  if (!D.airtable.configured) return;
+  const lastStep = cand.pipeline?.[cand.pipeline.length-1] || 'contact';
+  const pipelineMap = {'contact':'1er contact','fiche-envoyee':'Fiche envoyée','fiche-recue':'Fiche reçue','rdv':'RDV donné','retenu':'Retenu','refuse':'Non retenu'};
+  const fields = {
+    'Prénom': cand.prenom, 'Nom': cand.nom, 'Téléphone': cand.phone,
+    'Email': cand.email, 'Situation pro': cand.job, 'Revenus': cand.income||0,
+    'Notes': cand.notes, 'Pipeline': pipelineMap[lastStep]||'1er contact'
+  };
+  if (aptAirtableId) fields['Appartement'] = [aptAirtableId];
+  try {
+    if (cand.airtableId) {
+      await atFetch(`Candidats/${cand.airtableId}`, 'PATCH', {fields});
+    } else {
+      const res = await atFetch('Candidats', 'POST', {fields});
+      cand.airtableId = res.id;
+    }
+    save();
+  } catch(e) { showToast('Sync candidat: ' + e.message, 'error'); }
+}
+
+async function deleteFromAirtable(table, id) {
+  if (!D.airtable.configured || !id) return;
+  try { await atFetch(`${table}/${id}`, 'DELETE'); } catch(e) {}
+}
+
+async function uploadAttachmentToAirtable(candAirtableId, file) {
+  if (!D.airtable.configured || !candAirtableId) return false;
+  // Convert file to base64
+  const base64 = await new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+  try {
+    await atFetch(`Candidats/${candAirtableId}`, 'PATCH', {
+      fields: { 'Pièces jointes': [{ filename: file.name, contentType: file.type, content: base64 }] }
+    });
+    return true;
+  } catch(e) { showToast('Erreur upload: ' + e.message, 'error'); return false; }
+}
+
+function showSyncStatus(status) {
+  const ind = document.getElementById('airtable-status-indicator');
+  const txt = document.getElementById('airtable-status-text');
+  const dot = document.getElementById('airtable-dot-mobile');
+  const msgs = {syncing:'⏳ Synchronisation…', synced:'✅ Airtable synchronisé', error:'⚠️ Erreur sync'};
+  if (txt) txt.textContent = msgs[status] || '';
+  if (status === 'synced' || status === 'syncing') {
+    ind?.classList.replace('disconnected','connected');
+    if (dot) dot.style.background = status === 'synced' ? 'var(--sage)' : 'var(--gold)';
+  }
+}
+
+function updateAirtableIndicator() {
+  const ind = document.getElementById('airtable-status-indicator');
+  const txt = document.getElementById('airtable-status-text');
+  const dot = document.getElementById('airtable-dot-mobile');
+  if (D.airtable.configured) {
+    ind?.classList.replace('disconnected','connected');
+    if (txt) txt.textContent = '🔵 Airtable connecté';
+    if (dot) dot.style.background = '#4A90E2';
+  } else {
+    ind?.classList.replace('connected','disconnected');
+    if (txt) txt.textContent = 'Airtable non connecté';
+    if (dot) dot.style.background = 'var(--text-muted)';
+  }
+}
+
+// =============================================
 // NAVIGATION
 // =============================================
+const PAGE_TITLES = {dashboard:'🏠 Accueil',appartements:'🔑 Appartements','apt-detail':'← Appartement',gmail:'📧 Emails','email-detail':'← Email',compose:'✍️ Nouveau message',messages:'💬 Messages types',fiche:'📋 Fiche visite',settings:'⚙️ Paramètres'};
+
 function showPage(page, id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.getAttribute('onclick')?.includes(`'${page}'`)) n.classList.add('active');
-  });
-  if (page === 'dashboard') renderDashboard();
-  if (page === 'appartements') renderAptsList();
-  if (page === 'apt-detail' && id) { D.currentAptId = id; renderAptDetail(id); }
-  if (page === 'gmail') renderGmailPage();
-  if (page === 'compose') renderCompose();
-  if (page === 'messages') renderMessages();
-  if (page === 'fiche') renderFiche();
-  if (page === 'settings') renderSettings();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page)?.classList.add('active');
+  // Desktop nav
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.getAttribute('onclick')?.includes(`'${page}'`)) n.classList.add('active'); });
+  // Mobile nav
+  document.querySelectorAll('.mobile-nav-item').forEach(n=>n.classList.remove('active'));
+  const mn = document.getElementById(`mnav-${page}`);
+  if (mn) mn.classList.add('active');
+  // Mobile title
+  const mt = document.getElementById('mobile-title');
+  if (mt) mt.textContent = PAGE_TITLES[page] || '';
+
+  if (page==='dashboard') renderDashboard();
+  if (page==='appartements') renderAptsList();
+  if (page==='apt-detail' && id) { D.currentAptId=id; renderAptDetail(id); }
+  if (page==='gmail') renderGmailPage();
+  if (page==='compose') renderCompose();
+  if (page==='messages') renderMessages();
+  if (page==='fiche') renderFiche();
+  if (page==='settings') renderSettings();
+
+  window.scrollTo(0,0);
 }
 
 // =============================================
@@ -611,31 +878,37 @@ function showPage(page, id) {
 // =============================================
 function renderDashboard() {
   const apts = D.apartments;
-  const allCands = apts.reduce((s, a) => s + a.candidates.length, 0);
-  const today = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-  document.getElementById('dash-date').textContent = today.charAt(0).toUpperCase() + today.slice(1);
+  const allCands = apts.reduce((s,a)=>s+a.candidates.length,0);
+  const today = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('dash-date').textContent = today.charAt(0).toUpperCase()+today.slice(1);
   document.getElementById('nav-count').textContent = apts.length;
-  document.getElementById('sidebar-footer').textContent = `${apts.length} appartements · ${allCands} candidats`;
+  document.getElementById('sidebar-footer').textContent = `${apts.length} appts · ${allCands} candidats`;
   document.getElementById('stats-bar').innerHTML = `
-    <div class="stat-card"><div class="stat-value">${apts.length}</div><div class="stat-label">Appartements</div></div>
+    <div class="stat-card"><div class="stat-value">${apts.length}</div><div class="stat-label">Apparts</div></div>
     <div class="stat-card"><div class="stat-value" style="color:var(--sage)">${apts.filter(a=>a.status==='disponible').length}</div><div class="stat-label">Disponibles</div></div>
     <div class="stat-card"><div class="stat-value" style="color:var(--terracotta)">${apts.filter(a=>a.status==='loue').length}</div><div class="stat-label">Loués</div></div>
     <div class="stat-card"><div class="stat-value" style="color:var(--gold)">${allCands}</div><div class="stat-label">Candidats</div></div>
   `;
   document.getElementById('dashboard-cards').innerHTML = apts.map(aptCard).join('');
+  if (D.airtable.configured) {
+    document.getElementById('sync-bar-dash').innerHTML = `<div class="sync-bar"><div class="sync-dot synced"></div><span>Airtable connecté · <a href="#" onclick="syncFromAirtable();return false" style="color:var(--terracotta)">Synchroniser maintenant</a></span></div>`;
+  } else {
+    document.getElementById('sync-bar-dash').innerHTML = '';
+  }
   updateGmailIndicator();
+  updateAirtableIndicator();
 }
 
 function aptCard(apt) {
-  const sl = { disponible:'Disponible', loue:'Loué', 'en-cours':'En cours' };
+  const sl={disponible:'Disponible',loue:'Loué','en-cours':'En cours'};
   return `<div class="apt-card" onclick="showPage('apt-detail',${apt.id})">
     <div class="apt-card-img">
-      ${apt.photos.length > 0 ? `<img src="${apt.photos[0]}">` : `<div class="no-photo"><span>🏠</span><p>Ajouter des photos</p></div>`}
+      ${apt.photos.length>0?`<img src="${apt.photos[0]}">`:`<div class="no-photo"><span>🏠</span><p>Ajouter des photos</p></div>`}
       <span class="apt-status-badge status-${apt.status}">${sl[apt.status]}</span>
     </div>
     <div class="apt-card-body">
       <div class="apt-card-title">${apt.name}</div>
-      <div class="apt-card-meta"><span>📍 ${apt.address.split(',').slice(-1)[0].trim()}</span><span>📐 ${apt.surface}m²</span><span>🚪 ${apt.rooms}P</span></div>
+      <div class="apt-card-meta"><span>📍 ${apt.address.split(',').slice(-1)[0]?.trim()||apt.address}</span><span>📐 ${apt.surface}m²</span></div>
     </div>
     <div class="apt-card-footer">
       <span class="candidate-count">👤 ${apt.candidates.length} candidat${apt.candidates.length!==1?'s':''}</span>
@@ -644,17 +917,15 @@ function aptCard(apt) {
   </div>`;
 }
 
-function renderAptsList() {
-  document.getElementById('apts-list-cards').innerHTML = D.apartments.map(aptCard).join('');
-}
+function renderAptsList() { document.getElementById('apts-list-cards').innerHTML = D.apartments.map(aptCard).join(''); }
 
 // =============================================
 // APT DETAIL
 // =============================================
 function renderAptDetail(id) {
-  const apt = D.apartments.find(a => a.id === id);
+  const apt = D.apartments.find(a=>a.id===id);
   if (!apt) return;
-  const sl = { disponible:'Disponible', loue:'Loué', 'en-cours':'En cours' };
+  const sl={disponible:'Disponible',loue:'Loué','en-cours':'En cours'};
   document.getElementById('apt-detail-content').innerHTML = `
     <div class="apt-detail-header">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1">
@@ -662,17 +933,16 @@ function renderAptDetail(id) {
           <div class="apt-detail-name">${apt.name}</div>
           <div class="apt-detail-address">📍 ${apt.address}</div>
           <div class="apt-detail-meta">
-            <div class="apt-detail-meta-item"><strong>${apt.price}€/mois</strong>Loyer CC</div>
-            <div class="apt-detail-meta-item"><strong>${apt.charges}€</strong>Charges</div>
+            <div class="apt-detail-meta-item"><strong>${apt.price}€</strong>Loyer CC</div>
             <div class="apt-detail-meta-item"><strong>${apt.surface}m²</strong>Surface</div>
             <div class="apt-detail-meta-item"><strong>${apt.rooms}P</strong>Pièces</div>
             <div class="apt-detail-meta-item"><strong>DPE ${apt.dpe||'?'}</strong>Énergie</div>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
           <span class="apt-status-badge status-${apt.status}">${sl[apt.status]}</span>
-          <button class="btn btn-secondary btn-sm" onclick="editApt(${apt.id})">✏️ Modifier</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteApt(${apt.id})">🗑 Supprimer</button>
+          <button class="btn btn-secondary btn-sm" onclick="editApt(${apt.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteApt(${apt.id})">🗑</button>
         </div>
       </div>
     </div>
@@ -682,10 +952,12 @@ function renderAptDetail(id) {
       <button class="tab" onclick="switchTab(this,'tdcand${id}')">👤 Candidats (${apt.candidates.length})</button>
     </div>
     <div class="tab-panel active" id="tdann${id}">${renderAnnonce(apt)}</div>
-    <div class="tab-panel" id="tdpho${id}"><div class="photo-grid" id="photo-grid-${id}">
-      ${apt.photos.map((p,i)=>`<div class="photo-thumb"><img src="${p}"><button class="photo-delete" onclick="deletePhoto(${id},${i})">✕</button></div>`).join('')}
-      <label class="photo-add"><span class="plus">+</span><span>Ajouter</span><input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(${id},this)"></label>
-    </div></div>
+    <div class="tab-panel" id="tdpho${id}">
+      <div class="photo-grid" id="photo-grid-${id}">
+        ${apt.photos.map((p,i)=>`<div class="photo-thumb"><img src="${p}"><button class="photo-delete" onclick="deletePhoto(${id},${i})">✕</button></div>`).join('')}
+        <label class="photo-add"><span class="plus">+</span><span>Photo</span><input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(${id},this)"></label>
+      </div>
+    </div>
     <div class="tab-panel" id="tdcand${id}">
       <div class="section-header"><h3 class="section-title">Candidats</h3><button class="btn btn-primary btn-sm" onclick="openAddCandidate(${id})">+ Candidat</button></div>
       <div id="candidates-list-${id}">${renderCandidates(apt)}</div>
@@ -699,204 +971,230 @@ function renderAptDetail(id) {
 function renderAnnonce(apt) {
   const a = apt.annonce;
   const dpeColor = {A:'#00A651',B:'#51B848',C:'#BAD336',D:'#FFF200',E:'#F7941D',F:'#F15A24',G:'#ED1C24'};
-  const copyAll = () => {
-    const txt = `${a.titre}\n\n${a.resume}\n\n${a.texte}\n\nSurface : ${apt.surface}m² — ${apt.rooms} pièce(s) — Étage : ${apt.floor}\nLoyer : ${apt.price}€ CC (dont ${apt.charges}€ de charges)\nDPE : ${apt.dpe||'?'} — GES : ${apt.ges||'?'}\n\nÉquipements : ${a.equipements}`;
-    navigator.clipboard.writeText(txt).then(() => showToast('📋 Annonce complète copiée !', 'success'));
-  };
   return `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <h3 style="font-family:'DM Serif Display',serif;font-size:1.1rem">Annonce LeBonCoin</h3>
-      <button class="copy-all-btn" onclick="(${copyAll.toString()})()">📋 Tout copier en un clic</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1.05rem">Annonce LeBonCoin</h3>
+      <button class="copy-all-btn" onclick="copyAllAnnonce(${apt.id})">📋 Tout copier</button>
     </div>
     <div class="annonce-grid">
-      ${annonceField('Titre de l\'annonce', a.titre, `D.apartments.find(a=>a.id===${apt.id}).annonce.titre`, apt.id, 'titre')}
-      ${annonceField('Résumé (accroche)', a.resume, `D.apartments.find(a=>a.id===${apt.id}).annonce.resume`, apt.id, 'resume')}
-      ${annonceField('Description complète', a.texte, `D.apartments.find(a=>a.id===${apt.id}).annonce.texte`, apt.id, 'texte', true)}
       <div class="annonce-field">
-        <div class="annonce-field-header">
-          <span class="annonce-field-label">Loyer & Charges</span>
-          <button class="copy-btn" onclick="copyText('Loyer : ${apt.price}€ CC (dont ${apt.charges}€ de charges)')">📋</button>
-        </div>
-        <div class="annonce-field-value">${apt.price}€ CC · dont ${apt.charges}€ de charges</div>
+        <div class="annonce-field-header"><span class="annonce-field-label">Titre</span><button class="copy-btn" onclick="copyText(D.apartments.find(a=>a.id===${apt.id}).annonce.titre)">📋</button></div>
+        <input value="${escAttr(a.titre)}" oninput="D.apartments.find(a=>a.id===${apt.id}).annonce.titre=this.value;save()" placeholder="Titre de l'annonce">
       </div>
       <div class="annonce-field">
-        <div class="annonce-field-header">
-          <span class="annonce-field-label">DPE & GES</span>
-          <button class="copy-btn" onclick="copyText('DPE : ${apt.dpe||'?'} — GES : ${apt.ges||'?'}')">📋</button>
-        </div>
-        <div class="annonce-field-value" style="display:flex;gap:10px;align-items:center">
-          <span style="background:${dpeColor[apt.dpe]||'#ccc'};color:white;padding:3px 10px;border-radius:4px;font-weight:700">DPE ${apt.dpe||'?'}</span>
-          <span style="background:${dpeColor[apt.ges]||'#ccc'};color:white;padding:3px 10px;border-radius:4px;font-weight:700">GES ${apt.ges||'?'}</span>
+        <div class="annonce-field-header"><span class="annonce-field-label">Résumé (accroche)</span><button class="copy-btn" onclick="copyText(D.apartments.find(a=>a.id===${apt.id}).annonce.resume)">📋</button></div>
+        <input value="${escAttr(a.resume)}" oninput="D.apartments.find(a=>a.id===${apt.id}).annonce.resume=this.value;save()" placeholder="Courte accroche">
+      </div>
+      <div class="annonce-field">
+        <div class="annonce-field-header"><span class="annonce-field-label">Description complète</span><button class="copy-btn" onclick="copyText(D.apartments.find(a=>a.id===${apt.id}).annonce.texte)">📋</button></div>
+        <textarea style="min-height:80px" oninput="D.apartments.find(a=>a.id===${apt.id}).annonce.texte=this.value;save()" placeholder="Description détaillée…">${esc(a.texte)}</textarea>
+      </div>
+      <div class="annonce-field">
+        <div class="annonce-field-header"><span class="annonce-field-label">Loyer & Charges</span><button class="copy-btn" onclick="copyText('${apt.price}€ CC (dont ${apt.charges}€ de charges)')">📋</button></div>
+        <div style="font-size:0.88rem">${apt.price}€ CC · dont ${apt.charges}€ de charges</div>
+      </div>
+      <div class="annonce-field">
+        <div class="annonce-field-header"><span class="annonce-field-label">DPE & GES</span><button class="copy-btn" onclick="copyText('DPE : ${apt.dpe||'?'} — GES : ${apt.ges||'?'}')">📋</button></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <span style="background:${dpeColor[apt.dpe]||'#ccc'};color:${apt.dpe==='D'?'#333':'white'};padding:3px 10px;border-radius:4px;font-weight:700;font-size:0.84rem">DPE ${apt.dpe||'?'}</span>
+          <span style="background:${dpeColor[apt.ges]||'#ccc'};color:${apt.ges==='D'?'#333':'white'};padding:3px 10px;border-radius:4px;font-weight:700;font-size:0.84rem">GES ${apt.ges||'?'}</span>
         </div>
       </div>
-      ${annonceField('Équipements', a.equipements, `D.apartments.find(a=>a.id===${apt.id}).annonce.equipements`, apt.id, 'equipements')}
       <div class="annonce-field">
-        <div class="annonce-field-header"><span class="annonce-field-label">Lien annonce LeBonCoin</span></div>
-        <input class="form-input" type="url" value="${a.url||''}" placeholder="https://www.leboncoin.fr/…" oninput="D.apartments.find(a=>a.id===${apt.id}).annonce.url=this.value;save()" style="margin-top:4px">
+        <div class="annonce-field-header"><span class="annonce-field-label">Équipements</span><button class="copy-btn" onclick="copyText(D.apartments.find(a=>a.id===${apt.id}).annonce.equipements)">📋</button></div>
+        <input value="${escAttr(a.equipements)}" oninput="D.apartments.find(a=>a.id===${apt.id}).annonce.equipements=this.value;save()" placeholder="Cuisine équipée, lave-linge…">
+      </div>
+      <div class="annonce-field">
+        <div class="annonce-field-header"><span class="annonce-field-label">Lien LeBonCoin</span></div>
+        <input type="url" value="${escAttr(a.url||'')}" oninput="D.apartments.find(a=>a.id===${apt.id}).annonce.url=this.value;save()" placeholder="https://www.leboncoin.fr/…">
       </div>
     </div>
   `;
 }
 
-function annonceField(label, value, ref, aptId, key, isArea=false) {
-  const el = isArea
-    ? `<textarea class="form-textarea" style="min-height:80px;margin-top:6px" oninput="${ref.replace('annonce.'+key, 'annonce.'+key)}=this.value;save()">${esc(value)}</textarea>`
-    : `<input type="text" class="form-input" value="${escAttr(value)}" style="margin-top:6px" oninput="D.apartments.find(a=>a.id===${aptId}).annonce.${key}=this.value;save()">`;
-  return `<div class="annonce-field">
-    <div class="annonce-field-header">
-      <span class="annonce-field-label">${label}</span>
-      <button class="copy-btn" onclick="copyText(D.apartments.find(a=>a.id===${aptId}).annonce.${key})">📋 Copier</button>
-    </div>
-    ${el}
-  </div>`;
+function copyAllAnnonce(aptId) {
+  const apt = D.apartments.find(a=>a.id===aptId);
+  if (!apt) return;
+  const a = apt.annonce;
+  const txt = `${a.titre}\n\n${a.resume}\n\n${a.texte}\n\nSurface : ${apt.surface}m² — ${apt.rooms} pièce(s) — Étage : ${apt.floor}\nLoyer : ${apt.price}€ CC (dont ${apt.charges}€ de charges)\nDPE : ${apt.dpe||'?'} — GES : ${apt.ges||'?'}\n\nÉquipements : ${a.equipements}`;
+  navigator.clipboard.writeText(txt).then(()=>showToast('📋 Annonce complète copiée !','success'));
 }
 
 // =============================================
-// CANDIDATES + PIPELINE
+// CANDIDATES
 // =============================================
 const PIPELINE_STEPS = [
-  { key: 'contact', label: '📞 1er contact', cls: 'ps-contact' },
-  { key: 'fiche-envoyee', label: '📤 Fiche envoyée', cls: 'ps-fiche-envoyee' },
-  { key: 'fiche-recue', label: '📥 Fiche reçue', cls: 'ps-fiche-recue' },
-  { key: 'rdv', label: '📅 RDV donné', cls: 'ps-rdv' },
-  { key: 'refuse', label: '❌ Non retenu', cls: 'ps-refuse' }
+  {key:'contact',label:'📞 Contact',cls:'ps-contact'},
+  {key:'fiche-envoyee',label:'📤 Fiche envoyée',cls:'ps-fiche-envoyee'},
+  {key:'fiche-recue',label:'📥 Fiche reçue',cls:'ps-fiche-recue'},
+  {key:'rdv',label:'📅 RDV',cls:'ps-rdv'},
+  {key:'retenu',label:'✅ Retenu',cls:'ps-retenu'},
+  {key:'refuse',label:'❌ Refusé',cls:'ps-refuse'}
 ];
 
 function renderCandidates(apt) {
   if (!apt.candidates.length) return `<div class="empty-state"><span class="big-icon">👤</span><p>Aucun candidat.</p><button class="btn btn-primary btn-sm" onclick="openAddCandidate(${apt.id})">Ajouter</button></div>`;
-  return apt.candidates.map(c => `
+  return apt.candidates.map(c=>`
     <div class="candidate-item">
       <div class="candidate-row">
         <div class="candidate-avatar">${c.prenom.charAt(0)}${c.nom.charAt(0)}</div>
         <div class="candidate-info">
           <div class="candidate-name">${c.prenom} ${c.nom}</div>
-          <div class="candidate-detail">${[c.phone, c.email, c.job, c.income?c.income+'€/mois':''].filter(Boolean).join(' · ')}</div>
-          ${c.notes?`<div class="candidate-detail" style="font-style:italic;margin-top:2px">${c.notes}</div>`:''}
+          <div class="candidate-detail">${[c.phone,c.email,c.job,c.income?c.income+'€/mois':''].filter(Boolean).join(' · ')}</div>
+          ${c.notes?`<div class="candidate-detail" style="font-style:italic">${c.notes}</div>`:''}
         </div>
         <div class="candidate-actions">
-          ${c.email && D.gmail.configured ? `<button class="btn-icon" title="Email" onclick="composeToCandidate('${c.email}','${c.prenom} ${c.nom}',${apt.id})">📧</button>` : ''}
+          ${c.email&&D.gmail.configured?`<button class="btn-icon" title="Email" onclick="composeToCandidate('${escAttr(c.email)}','${escAttr(c.prenom+' '+c.nom)}',${apt.id})">📧</button>`:''}
+          ${D.airtable.configured?`<button class="btn-icon" title="Joindre fichier" onclick="openFileUpload(${apt.id},${c.id})">📎</button>`:''}
           <button class="btn-icon" style="color:#E74C3C" onclick="removeCandidate(${apt.id},${c.id})">🗑</button>
         </div>
       </div>
       <div class="pipeline">
-        ${PIPELINE_STEPS.map(s => `
-          <div class="pipeline-step ${s.cls} ${(c.pipeline||[]).includes(s.key)?'done':'todo'}"
-               onclick="togglePipeline(${apt.id},${c.id},'${s.key}',this)">
-            ${s.label}
-          </div>`).join('')}
+        ${PIPELINE_STEPS.map(s=>`<div class="pipeline-step ${s.cls} ${(c.pipeline||[]).includes(s.key)?'done':'todo'}" onclick="togglePipeline(${apt.id},${c.id},'${s.key}',this)">${s.label}</div>`).join('')}
       </div>
     </div>
   `).join('');
 }
 
 function togglePipeline(aptId, candId, step, el) {
-  const apt = D.apartments.find(a => a.id === aptId);
-  const cand = apt?.candidates.find(c => c.id === candId);
+  const apt = D.apartments.find(a=>a.id===aptId);
+  const cand = apt?.candidates.find(c=>c.id===candId);
   if (!cand) return;
-  if (!cand.pipeline) cand.pipeline = [];
-  if (cand.pipeline.includes(step)) {
-    cand.pipeline = cand.pipeline.filter(s => s !== step);
-    el.classList.remove('done'); el.classList.add('todo');
-  } else {
-    cand.pipeline.push(step);
-    el.classList.remove('todo'); el.classList.add('done');
-  }
+  if (!cand.pipeline) cand.pipeline=[];
+  if (cand.pipeline.includes(step)) { cand.pipeline=cand.pipeline.filter(s=>s!==step); el.classList.remove('done'); el.classList.add('todo'); }
+  else { cand.pipeline.push(step); el.classList.remove('todo'); el.classList.add('done'); }
   save();
+  pushCandidateToAirtable(cand, apt.airtableId);
 }
 
 function openAddCandidate(aptId) {
   D.currentAptId = aptId;
   const sel = document.getElementById('new-cand-apt-id');
-  sel.innerHTML = D.apartments.map(a => `<option value="${a.id}" ${a.id===aptId?'selected':''}>${a.name}</option>`).join('');
+  sel.innerHTML = D.apartments.map(a=>`<option value="${a.id}" ${a.id===aptId?'selected':''}>${a.name}</option>`).join('');
   openModal('modal-add-candidate');
 }
 
-function addCandidate() {
+async function addCandidate() {
   const prenom = document.getElementById('new-cand-prenom').value.trim();
   const nom = document.getElementById('new-cand-nom').value.trim();
-  if (!prenom || !nom) { showToast('Prénom et nom requis', 'error'); return; }
+  if (!prenom||!nom) { showToast('Prénom et nom requis','error'); return; }
   const aptId = parseInt(document.getElementById('new-cand-apt-id').value);
-  const apt = D.apartments.find(a => a.id === aptId);
+  const apt = D.apartments.find(a=>a.id===aptId);
   if (!apt) return;
-  apt.candidates.push({ id: Date.now(), prenom, nom,
-    phone: document.getElementById('new-cand-phone').value,
-    email: document.getElementById('new-cand-email').value,
-    job: document.getElementById('new-cand-job').value,
-    income: parseInt(document.getElementById('new-cand-income').value)||0,
-    notes: document.getElementById('new-cand-notes').value,
-    pipeline: ['contact']
-  });
+  const cand = { id:Date.now(), airtableId:null, prenom, nom,
+    phone:document.getElementById('new-cand-phone').value,
+    email:document.getElementById('new-cand-email').value,
+    job:document.getElementById('new-cand-job').value,
+    income:parseInt(document.getElementById('new-cand-income').value)||0,
+    notes:document.getElementById('new-cand-notes').value,
+    pipeline:['contact']
+  };
+  apt.candidates.push(cand);
   closeModal('modal-add-candidate');
-  ['prenom','nom','phone','email','job','income','notes'].forEach(f => { const el = document.getElementById('new-cand-'+f); if(el) el.value=''; });
-  save(); showToast('Candidat ajouté !', 'success');
+  ['prenom','nom','phone','email','job','income','notes'].forEach(f=>{const el=document.getElementById('new-cand-'+f);if(el)el.value='';});
+  save(); showToast('Candidat ajouté !','success');
   const el = document.getElementById(`candidates-list-${aptId}`);
   if (el) el.innerHTML = renderCandidates(apt);
+  await pushCandidateToAirtable(cand, apt.airtableId);
 }
 
-function removeCandidate(aptId, candId) {
-  const apt = D.apartments.find(a => a.id === aptId);
-  if (!apt || !confirm('Supprimer ce candidat ?')) return;
-  apt.candidates = apt.candidates.filter(c => c.id !== candId);
+async function removeCandidate(aptId, candId) {
+  const apt = D.apartments.find(a=>a.id===aptId);
+  if (!apt||!confirm('Supprimer ce candidat ?')) return;
+  const cand = apt.candidates.find(c=>c.id===candId);
+  apt.candidates = apt.candidates.filter(c=>c.id!==candId);
   const el = document.getElementById(`candidates-list-${aptId}`);
   if (el) el.innerHTML = renderCandidates(apt);
   save(); showToast('Candidat supprimé');
+  if (cand?.airtableId) await deleteFromAirtable('Candidats', cand.airtableId);
 }
 
-function saveCandidateFromEmail() {
+async function saveCandidateFromEmail() {
   const prenom = document.getElementById('cfe-prenom').value.trim();
   const nom = document.getElementById('cfe-nom').value.trim();
-  const email = document.getElementById('cfe-email').value;
-  if (!prenom || !nom) { showToast('Prénom et nom requis', 'error'); return; }
+  if (!prenom||!nom) { showToast('Prénom et nom requis','error'); return; }
   const aptId = parseInt(document.getElementById('cfe-apt-id').value);
-  const apt = D.apartments.find(a => a.id === aptId);
+  const apt = D.apartments.find(a=>a.id===aptId);
   if (!apt) return;
-  apt.candidates.push({ id: Date.now(), prenom, nom, email,
-    phone: document.getElementById('cfe-phone').value,
-    job: document.getElementById('cfe-job').value,
-    income: parseInt(document.getElementById('cfe-income').value)||0,
-    notes: document.getElementById('cfe-notes').value,
-    pipeline: ['contact']
-  });
+  const cand = { id:Date.now(), airtableId:null, prenom, nom,
+    email:document.getElementById('cfe-email').value,
+    phone:document.getElementById('cfe-phone').value,
+    job:document.getElementById('cfe-job').value,
+    income:parseInt(document.getElementById('cfe-income').value)||0,
+    notes:document.getElementById('cfe-notes').value,
+    pipeline:['contact']
+  };
+  apt.candidates.push(cand);
   closeModal('modal-cand-from-email');
-  save(); showToast('Candidat ajouté !', 'success');
+  save(); showToast('Candidat ajouté !','success');
+  await pushCandidateToAirtable(cand, apt.airtableId);
+}
+
+// FILE UPLOAD for candidate
+function openFileUpload(aptId, candId) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.pdf,image/*';
+  input.onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const apt = D.apartments.find(a=>a.id===aptId);
+    const cand = apt?.candidates.find(c=>c.id===candId);
+    if (!cand) return;
+    if (!cand.airtableId) {
+      showToast('Candidat pas encore synchronisé avec Airtable','error'); return;
+    }
+    showToast('⏳ Upload en cours…');
+    const ok = await uploadAttachmentToAirtable(cand.airtableId, file);
+    if (ok) showToast('📎 Fichier joint avec succès !','success');
+  };
+  input.click();
 }
 
 // =============================================
 // APARTMENTS CRUD
 // =============================================
-function saveApartment() {
+function openAddApt() {
+  document.getElementById('modal-apt-title').textContent = 'Nouvel appartement';
+  document.getElementById('edit-apt-id').value = '';
+  ['name','address','price','charges','surface','rooms','floor'].forEach(f=>{ const el=document.getElementById('new-apt-'+f); if(el)el.value=''; });
+  document.getElementById('new-apt-status').value = 'disponible';
+  document.getElementById('new-apt-dpe').value = '';
+  openModal('modal-add-apt');
+}
+
+async function saveApartment() {
   const id = document.getElementById('edit-apt-id').value;
   const data = {
-    name: document.getElementById('new-apt-name').value.trim(),
-    address: document.getElementById('new-apt-address').value,
-    status: document.getElementById('new-apt-status').value,
-    price: parseInt(document.getElementById('new-apt-price').value)||0,
-    charges: parseInt(document.getElementById('new-apt-charges').value)||0,
-    surface: parseInt(document.getElementById('new-apt-surface').value)||0,
-    rooms: parseInt(document.getElementById('new-apt-rooms').value)||1,
-    floor: document.getElementById('new-apt-floor').value,
-    dpe: document.getElementById('new-apt-dpe').value,
-    ges: document.getElementById('new-apt-ges').value,
+    name:document.getElementById('new-apt-name').value.trim(),
+    address:document.getElementById('new-apt-address').value,
+    status:document.getElementById('new-apt-status').value,
+    price:parseInt(document.getElementById('new-apt-price').value)||0,
+    charges:parseInt(document.getElementById('new-apt-charges').value)||0,
+    surface:parseInt(document.getElementById('new-apt-surface').value)||0,
+    rooms:parseInt(document.getElementById('new-apt-rooms').value)||1,
+    floor:document.getElementById('new-apt-floor').value,
+    dpe:document.getElementById('new-apt-dpe').value,
+    ges:document.getElementById('new-apt-ges').value,
   };
-  if (!data.name) { showToast('Nom requis', 'error'); return; }
+  if (!data.name) { showToast('Nom requis','error'); return; }
   if (id) {
-    const apt = D.apartments.find(a => a.id === parseInt(id));
-    if (apt) Object.assign(apt, data);
-    closeModal('modal-add-apt');
-    save(); showToast('Appartement mis à jour !', 'success');
-    showPage('apt-detail', parseInt(id));
+    const apt = D.apartments.find(a=>a.id===parseInt(id));
+    if (apt) { Object.assign(apt,data); await pushApartmentToAirtable(apt); }
+    closeModal('modal-add-apt'); save(); showToast('Mis à jour !','success');
+    showPage('apt-detail',parseInt(id));
   } else {
-    D.apartments.push({ id: Date.now(), ...data, annonce: { titre:'', resume:'', texte:'', equipements:'', url:'' }, photos: [], candidates: [] });
-    closeModal('modal-add-apt');
-    save(); showToast('Appartement ajouté !', 'success');
+    const apt = { id:Date.now(), airtableId:null, ...data, annonce:{titre:'',resume:'',texte:'',equipements:'',url:''}, photos:[], candidates:[] };
+    D.apartments.push(apt);
+    closeModal('modal-add-apt'); save(); showToast('Appartement ajouté !','success');
+    await pushApartmentToAirtable(apt);
     renderDashboard();
   }
 }
 
 function editApt(id) {
-  const apt = D.apartments.find(a => a.id === id);
+  const apt = D.apartments.find(a=>a.id===id);
   if (!apt) return;
-  document.getElementById('modal-apt-title').textContent = 'Modifier l\'appartement';
+  document.getElementById('modal-apt-title').textContent = 'Modifier';
   document.getElementById('edit-apt-id').value = id;
   document.getElementById('new-apt-name').value = apt.name;
   document.getElementById('new-apt-address').value = apt.address;
@@ -911,12 +1209,12 @@ function editApt(id) {
   openModal('modal-add-apt');
 }
 
-function deleteApt(id) {
-  const apt = D.apartments.find(a => a.id === id);
-  if (!apt) return;
-  if (!confirm(`Supprimer "${apt.name}" et tous ses candidats ? Cette action est irréversible.`)) return;
-  D.apartments = D.apartments.filter(a => a.id !== id);
-  save(); showToast('Appartement supprimé', 'success');
+async function deleteApt(id) {
+  const apt = D.apartments.find(a=>a.id===id);
+  if (!apt||!confirm(`Supprimer "${apt.name}" ?`)) return;
+  D.apartments = D.apartments.filter(a=>a.id!==id);
+  save(); showToast('Supprimé','success');
+  if (apt.airtableId) await deleteFromAirtable('Appartements', apt.airtableId);
   showPage('appartements');
 }
 
@@ -924,124 +1222,108 @@ function deleteApt(id) {
 // GMAIL
 // =============================================
 let gmailEmails = [];
-let tokenClient = null;
 
 function updateGmailIndicator() {
   const ind = document.getElementById('gmail-status-indicator');
   const txt = document.getElementById('gmail-status-text');
   const em = document.getElementById('gmail-status-email');
-  if (D.gmail.configured && D.gmail.accessToken) {
-    ind.className = 'gmail-status connected';
-    txt.textContent = 'Gmail connecté'; em.textContent = D.gmail.email;
+  const dot = document.getElementById('gmail-dot-mobile');
+  if (D.gmail.configured&&D.gmail.accessToken) {
+    ind.className='gmail-status connected'; txt.textContent='Gmail connecté'; em.textContent=D.gmail.email;
+    if (dot) dot.style.background='var(--sage)';
   } else if (D.gmail.configured) {
-    ind.className = 'gmail-status disconnected';
-    txt.textContent = 'Reconnexion requise'; em.textContent = D.gmail.email;
+    ind.className='gmail-status disconnected'; txt.textContent='Reconnexion requise'; em.textContent=D.gmail.email;
   } else {
-    ind.className = 'gmail-status disconnected';
-    txt.textContent = 'Gmail non connecté'; em.textContent = 'Cliquer pour configurer';
+    ind.className='gmail-status disconnected'; txt.textContent='Gmail non connecté'; em.textContent='Configurer →';
   }
 }
 
-function loadGoogleScripts() {
-  return new Promise(resolve => {
-    if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && google.accounts) { resolve(); return; }
-    let n = 0; const check = () => { if (++n === 2) resolve(); };
-    if (typeof gapi === 'undefined') { const s = document.createElement('script'); s.src = 'https://apis.google.com/js/api.js'; s.onload = check; document.head.appendChild(s); } else check();
-    if (typeof google === 'undefined' || !google.accounts) { const s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.onload = check; document.head.appendChild(s); } else check();
+async function loadGoogleScripts() {
+  return new Promise(resolve=>{
+    if (typeof gapi!=='undefined'&&typeof google!=='undefined'&&google.accounts){resolve();return;}
+    let n=0; const check=()=>{if(++n===2)resolve();};
+    if(typeof gapi==='undefined'){const s=document.createElement('script');s.src='https://apis.google.com/js/api.js';s.onload=check;document.head.appendChild(s);}else check();
+    if(typeof google==='undefined'||!google.accounts){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=check;document.head.appendChild(s);}else check();
   });
 }
 
 async function initGapi() {
-  await new Promise(resolve => gapi.load('client', resolve));
-  await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'] });
+  await new Promise(resolve=>gapi.load('client',resolve));
+  await gapi.client.init({discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest']});
 }
 
 async function connectGmail() {
-  if (!D.gmail.clientId) { showToast('Configurez d\'abord votre Client ID', 'error'); showPage('settings'); return; }
-  await loadGoogleScripts();
-  await initGapi();
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: D.gmail.clientId,
-    scope: 'https://www.googleapis.com/auth/gmail.modify',
-    callback: r => {
-      if (r.error) { showToast('Erreur OAuth : ' + r.error, 'error'); return; }
-      D.gmail.accessToken = r.access_token;
-      gapi.client.setToken({ access_token: r.access_token });
-      updateGmailIndicator(); showToast('✅ Gmail connecté !', 'success');
+  if (!D.gmail.clientId){showToast('Configurez d\'abord votre Client ID','error');showPage('settings');return;}
+  await loadGoogleScripts(); await initGapi();
+  const tc = google.accounts.oauth2.initTokenClient({
+    client_id:D.gmail.clientId, scope:'https://www.googleapis.com/auth/gmail.modify',
+    callback:r=>{
+      if(r.error){showToast('Erreur OAuth: '+r.error,'error');return;}
+      D.gmail.accessToken=r.access_token;
+      gapi.client.setToken({access_token:r.access_token});
+      updateGmailIndicator(); showToast('✅ Gmail connecté !','success');
       save(); loadInbox();
     }
   });
-  tokenClient.requestAccessToken({ prompt: 'consent' });
+  tc.requestAccessToken({prompt:'consent'});
 }
 
 function renderGmailPage() {
   const c = document.getElementById('gmail-page-content');
-  if (!D.gmail.configured) {
-    c.innerHTML = `<div class="gmail-connect-banner"><span class="big-icon">📧</span><h3>Connectez votre adresse Gmail</h3><p>Lisez et gérez vos emails directement depuis l'application.</p><button class="btn btn-gmail" onclick="showPage('settings')">⚙️ Configurer Gmail</button></div>`;
-    return;
-  }
-  if (!D.gmail.accessToken) {
-    c.innerHTML = `<div class="gmail-connect-banner"><span class="big-icon">🔑</span><h3>Reconnexion requise</h3><p>Votre session a expiré.</p><button class="btn btn-gmail" onclick="connectGmail()">Se connecter avec Google</button></div>`;
-    return;
-  }
+  if (!D.gmail.configured) { c.innerHTML=`<div class="gmail-connect-banner"><span class="big-icon">📧</span><h3>Connectez Gmail</h3><p>Lisez et gérez vos emails depuis l'app.</p><button class="btn btn-gmail" onclick="showPage('settings')">⚙️ Configurer</button></div>`; return; }
+  if (!D.gmail.accessToken) { c.innerHTML=`<div class="gmail-connect-banner"><span class="big-icon">🔑</span><h3>Reconnexion requise</h3><p>Votre session a expiré.</p><button class="btn btn-gmail" onclick="connectGmail()">Se connecter</button></div>`; return; }
   loadInbox();
 }
 
 async function loadInbox(folder) {
-  document.getElementById('gmail-page-content').innerHTML = `<div class="loading"><div class="spinner"></div> Chargement…</div>`;
+  document.getElementById('gmail-page-content').innerHTML=`<div class="loading"><div class="spinner"></div> Chargement…</div>`;
   try {
     await loadGoogleScripts();
     if (!gapi.client.gmail) await initGapi();
-    gapi.client.setToken({ access_token: D.gmail.accessToken });
-
-    const q = folder && folder !== 'INBOX' ? `label:${folder.toLowerCase().replace(/ /g,'-')}` : '';
-    const res = await gapi.client.gmail.users.messages.list({ userId:'me', maxResults:30, labelIds: folder === 'INBOX' || !folder ? ['INBOX'] : undefined, q: q || undefined });
-    const msgs = res.result.messages || [];
-    gmailEmails = [];
-
-    await Promise.all(msgs.slice(0,25).map(async msg => {
-      const d = await gapi.client.gmail.users.messages.get({ userId:'me', id:msg.id, format:'metadata', metadataHeaders:['From','Subject','Date'] });
-      const h = d.result.payload.headers;
-      const get = n => (h.find(x => x.name===n)||{}).value||'';
-      gmailEmails.push({ id:msg.id, from:get('From'), subject:get('Subject')||'(sans objet)', date:get('Date'), snippet:d.result.snippet||'', unread: d.result.labelIds?.includes('UNREAD'), threadId:d.result.threadId });
+    gapi.client.setToken({access_token:D.gmail.accessToken});
+    const res = await gapi.client.gmail.users.messages.list({userId:'me',maxResults:25,labelIds:!folder||folder==='INBOX'?['INBOX']:undefined});
+    const msgs = res.result.messages||[];
+    gmailEmails=[];
+    await Promise.all(msgs.slice(0,20).map(async msg=>{
+      const d = await gapi.client.gmail.users.messages.get({userId:'me',id:msg.id,format:'metadata',metadataHeaders:['From','Subject','Date']});
+      const h=d.result.payload.headers;
+      const get=n=>(h.find(x=>x.name===n)||{}).value||'';
+      gmailEmails.push({id:msg.id,from:get('From'),subject:get('Subject')||'(sans objet)',date:get('Date'),snippet:d.result.snippet||'',unread:d.result.labelIds?.includes('UNREAD'),threadId:d.result.threadId});
     }));
-    gmailEmails.sort((a,b) => new Date(b.date)-new Date(a.date));
-
-    const unread = gmailEmails.filter(e=>e.unread).length;
-    const badge = document.getElementById('unread-badge');
-    badge.style.display = unread > 0 ? '' : 'none';
-    badge.textContent = unread;
-
+    gmailEmails.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    const unread=gmailEmails.filter(e=>e.unread).length;
+    const badge=document.getElementById('unread-badge');
+    badge.style.display=unread>0?'':'none'; badge.textContent=unread;
+    const mb=document.getElementById('gmail-mobile-badge');
+    if(mb){mb.dataset.count=unread;mb.className='mobile-nav-badge'+(unread>0?' has-badge':'');}
     renderInbox(folder);
   } catch(e) {
-    if (e.status === 401) { D.gmail.accessToken = null; updateGmailIndicator(); renderGmailPage(); }
-    else document.getElementById('gmail-page-content').innerHTML = `<div class="empty-state"><span class="big-icon">⚠️</span><p>${e.message||e}</p><button class="btn btn-primary" onclick="loadInbox()">Réessayer</button></div>`;
+    if(e.status===401){D.gmail.accessToken=null;updateGmailIndicator();renderGmailPage();}
+    else document.getElementById('gmail-page-content').innerHTML=`<div class="empty-state"><span class="big-icon">⚠️</span><p>${e.message}</p><button class="btn btn-primary" onclick="loadInbox()">Réessayer</button></div>`;
   }
 }
 
-function renderInbox(currentFolder) {
-  const cf = currentFolder || 'INBOX';
-  document.getElementById('gmail-page-content').innerHTML = `
+function renderInbox(cf) {
+  cf=cf||'INBOX';
+  document.getElementById('gmail-page-content').innerHTML=`
     <div class="folder-pills">
-      ${D.folders.map(f => `<div class="folder-pill ${f===cf?'active':''}" onclick="loadInbox('${f}')">${f}</div>`).join('')}
+      ${D.folders.map(f=>`<div class="folder-pill ${f===cf?'active':''}" onclick="loadInbox('${f}')">${f}</div>`).join('')}
     </div>
     <div class="email-toolbar">
       <input type="text" class="email-search" placeholder="🔍 Rechercher…" oninput="filterEmails(this.value)">
-      <button class="btn btn-secondary btn-sm" id="btn-select-all" onclick="toggleSelectAll()">☐ Tout sélectionner</button>
-      <button class="btn btn-danger btn-sm" id="btn-delete-sel" style="display:none" onclick="deleteSelected()">🗑 Supprimer</button>
-      <button class="btn btn-secondary btn-sm" id="btn-move-sel" style="display:none" onclick="openFolderModal()">📁 Déplacer</button>
+      <button class="btn btn-danger btn-sm" id="btn-delete-sel" style="display:none" onclick="deleteSelected()">🗑</button>
+      <button class="btn btn-secondary btn-sm" id="btn-move-sel" style="display:none" onclick="openFolderModal()">📁</button>
     </div>
-    <div id="email-list">${gmailEmails.map(e=>renderEmailItem(e,cf)).join('')}</div>
+    <div id="email-list">${gmailEmails.map(e=>renderEmailItem(e)).join('')}</div>
   `;
-  D.selectedEmails = [];
+  D.selectedEmails=[];
 }
 
-function renderEmailItem(email, folder) {
-  const fromName = email.from.split('<')[0].trim().replace(/"/g,'') || email.from;
-  const aptTag = guessApt(email);
-  const folderTag = D.emailFolders[email.id];
+function renderEmailItem(email) {
+  const fromName=email.from.split('<')[0].trim().replace(/"/g,'')||email.from;
+  const aptTag=guessApt(email);
   return `<div class="email-item ${email.unread?'unread':''}" id="eitem-${email.id}">
-    <input type="checkbox" class="email-bulk-check" onchange="toggleEmailSelect('${email.id}',this.checked)" onclick="event.stopPropagation()">
+    <input type="checkbox" style="flex-shrink:0;margin-top:4px" onchange="toggleEmailSelect('${email.id}',this.checked)" onclick="event.stopPropagation()">
     <div class="email-avatar" onclick="openEmail('${email.id}')">${fromName.charAt(0).toUpperCase()}</div>
     <div class="email-content" onclick="openEmail('${email.id}')">
       <div class="email-from">${fromName}</div>
@@ -1051,295 +1333,200 @@ function renderEmailItem(email, folder) {
     <div class="email-meta">
       <div class="email-date">${fmtDate(email.date)}</div>
       ${aptTag?`<div class="email-apt-tag">${aptTag}</div>`:''}
-      ${folderTag&&folderTag!=='INBOX'?`<div class="email-apt-tag" style="background:rgba(122,140,110,0.2);color:var(--sage)">📁 ${folderTag}</div>`:''}
     </div>
   </div>`;
 }
 
-function toggleEmailSelect(id, checked) {
-  if (checked) { if (!D.selectedEmails.includes(id)) D.selectedEmails.push(id); }
-  else D.selectedEmails = D.selectedEmails.filter(e => e !== id);
-  const hasSel = D.selectedEmails.length > 0;
-  document.getElementById('btn-delete-sel').style.display = hasSel ? '' : 'none';
-  document.getElementById('btn-move-sel').style.display = hasSel ? '' : 'none';
-}
-
-function toggleSelectAll() {
-  const allChecked = D.selectedEmails.length === gmailEmails.length;
-  D.selectedEmails = allChecked ? [] : gmailEmails.map(e => e.id);
-  document.querySelectorAll('.email-bulk-check').forEach((cb, i) => { cb.checked = !allChecked; });
-  document.getElementById('btn-delete-sel').style.display = !allChecked ? '' : 'none';
-  document.getElementById('btn-move-sel').style.display = !allChecked ? '' : 'none';
+function toggleEmailSelect(id,checked) {
+  if(checked){if(!D.selectedEmails.includes(id))D.selectedEmails.push(id);}
+  else D.selectedEmails=D.selectedEmails.filter(e=>e!==id);
+  const has=D.selectedEmails.length>0;
+  document.getElementById('btn-delete-sel').style.display=has?'':'none';
+  document.getElementById('btn-move-sel').style.display=has?'':'none';
 }
 
 async function deleteSelected() {
-  if (!D.selectedEmails.length || !confirm(`Supprimer ${D.selectedEmails.length} email(s) ?`)) return;
+  if(!D.selectedEmails.length||!confirm(`Supprimer ${D.selectedEmails.length} email(s) ?`))return;
   try {
-    gapi.client.setToken({ access_token: D.gmail.accessToken });
-    await Promise.all(D.selectedEmails.map(id =>
-      gapi.client.gmail.users.messages.trash({ userId: 'me', id })
-    ));
-    gmailEmails = gmailEmails.filter(e => !D.selectedEmails.includes(e.id));
-    D.selectedEmails = [];
-    showToast('Emails supprimés', 'success');
-    renderInbox();
-  } catch(e) { showToast('Erreur : ' + e.message, 'error'); }
+    gapi.client.setToken({access_token:D.gmail.accessToken});
+    await Promise.all(D.selectedEmails.map(id=>gapi.client.gmail.users.messages.trash({userId:'me',id})));
+    gmailEmails=gmailEmails.filter(e=>!D.selectedEmails.includes(e.id));
+    D.selectedEmails=[]; showToast('Emails supprimés','success'); renderInbox();
+  } catch(e){showToast('Erreur: '+e.message,'error');}
 }
 
 function openFolderModal() {
-  document.getElementById('folder-list-modal').innerHTML = D.folders.map(f =>
-    `<button class="btn btn-secondary" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="moveToFolder('${f}')">${f}</button>`
-  ).join('');
+  document.getElementById('folder-list-modal').innerHTML=D.folders.map(f=>`<button class="btn btn-secondary" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="moveToFolder('${f}')">${f}</button>`).join('');
   openModal('modal-folder');
 }
 
 function moveToFolder(folder) {
-  D.selectedEmails.forEach(id => { D.emailFolders[id] = folder; });
-  closeModal('modal-folder');
-  save(); showToast(`Déplacé vers "${folder}"`, 'success');
-  D.selectedEmails = [];
-  renderInbox();
+  D.selectedEmails.forEach(id=>{D.emailFolders[id]=folder;});
+  closeModal('modal-folder'); save(); showToast(`Déplacé vers "${folder}"`,'success');
+  D.selectedEmails=[]; renderInbox();
 }
 
 function createFolder() {
-  const name = document.getElementById('new-folder-input').value.trim();
-  if (!name || D.folders.includes(name)) return;
-  D.folders.push(name);
-  save();
-  document.getElementById('new-folder-input').value = '';
+  const name=document.getElementById('new-folder-input').value.trim();
+  if(!name||D.folders.includes(name))return;
+  D.folders.push(name); save();
+  document.getElementById('new-folder-input').value='';
   openFolderModal();
 }
 
 async function openEmail(emailId) {
   showPage('email-detail');
-  document.getElementById('email-detail-content').innerHTML = `<div class="loading"><div class="spinner"></div> Chargement…</div>`;
+  document.getElementById('email-detail-content').innerHTML=`<div class="loading"><div class="spinner"></div> Chargement…</div>`;
   try {
-    gapi.client.setToken({ access_token: D.gmail.accessToken });
-    const res = await gapi.client.gmail.users.messages.get({ userId:'me', id:emailId, format:'full' });
-    const msg = res.result;
-    const h = msg.payload.headers;
-    const get = n => (h.find(x => x.name===n)||{}).value||'';
-
-    await gapi.client.gmail.users.messages.modify({ userId:'me', id:emailId, resource:{ removeLabelIds:['UNREAD'] } });
-
-    let body = '';
-    const exBody = p => {
-      if (p.mimeType==='text/plain' && p.body?.data) body = atob(p.body.data.replace(/-/g,'+').replace(/_/g,'/'));
-      else if (p.parts) p.parts.forEach(exBody);
-    };
-    if (msg.payload.body?.data) body = atob(msg.payload.body.data.replace(/-/g,'+').replace(/_/g,'/'));
-    else if (msg.payload.parts) msg.payload.parts.forEach(exBody);
-
-    const from = get('From');
-    const fromName = from.split('<')[0].trim().replace(/"/g,'');
-    const fromEmail = (from.match(/<(.+)>/) || [,''])[1] || from;
-    const subject = get('Subject');
-
-    const el = gmailEmails.find(e=>e.id===emailId);
-    if (el) el.unread = false;
-    const unread = gmailEmails.filter(e=>e.unread).length;
-    const badge = document.getElementById('unread-badge');
-    badge.style.display = unread > 0 ? '' : 'none';
-    badge.textContent = unread;
-
-    document.getElementById('email-detail-content').innerHTML = `
+    gapi.client.setToken({access_token:D.gmail.accessToken});
+    const res=await gapi.client.gmail.users.messages.get({userId:'me',id:emailId,format:'full'});
+    const msg=res.result;
+    const h=msg.payload.headers;
+    const get=n=>(h.find(x=>x.name===n)||{}).value||'';
+    await gapi.client.gmail.users.messages.modify({userId:'me',id:emailId,resource:{removeLabelIds:['UNREAD']}});
+    let body='';
+    const exBody=p=>{if(p.mimeType==='text/plain'&&p.body?.data)body=atob(p.body.data.replace(/-/g,'+').replace(/_/g,'/'));else if(p.parts)p.parts.forEach(exBody);};
+    if(msg.payload.body?.data)body=atob(msg.payload.body.data.replace(/-/g,'+').replace(/_/g,'/'));
+    else if(msg.payload.parts)msg.payload.parts.forEach(exBody);
+    const from=get('From');
+    const fromName=from.split('<')[0].trim().replace(/"/g,'');
+    const fromEmail=(from.match(/<(.+)>/)||[,''])[1]||from;
+    const subject=get('Subject');
+    const el=gmailEmails.find(e=>e.id===emailId);
+    if(el)el.unread=false;
+    const unread=gmailEmails.filter(e=>e.unread).length;
+    document.getElementById('unread-badge').style.display=unread>0?'':'none';
+    document.getElementById('unread-badge').textContent=unread;
+    document.getElementById('email-detail-content').innerHTML=`
       <div class="email-detail">
         <div class="email-detail-header">
           <div class="email-detail-subject">${subject||'(sans objet)'}</div>
-          <div class="email-detail-meta">
-            <span>De : <strong>${fromName}</strong> &lt;${fromEmail}&gt;</span>
-            <span>${new Date(get('Date')).toLocaleString('fr-FR')}</span>
-          </div>
+          <div class="email-detail-meta">De : <strong>${fromName}</strong> &lt;${fromEmail}&gt; · ${new Date(get('Date')).toLocaleString('fr-FR')}</div>
         </div>
-        <div class="email-detail-body">${esc(body)||'<em style="color:var(--text-muted)">Contenu non disponible en texte.</em>'}</div>
+        <div class="email-detail-body">${esc(body)||'<em style="color:var(--text-muted)">Contenu non disponible.</em>'}</div>
         <div class="email-detail-actions">
-          <button class="btn btn-primary" onclick="composeReply('${escAttr(fromEmail)}','${escAttr(fromName)}','${escAttr(subject)}')">↩ Répondre</button>
-          <button class="btn btn-secondary" onclick="openAddFromEmail('${escAttr(fromEmail)}','${escAttr(fromName)}')">➕ Ajouter candidat</button>
-          <button class="btn btn-secondary" onclick="deleteOneEmail('${emailId}')">🗑 Supprimer</button>
-          <button class="btn btn-ghost" onclick="openFolderForOne('${emailId}')">📁 Classer</button>
-          <button class="btn btn-ghost" onclick="showPage('gmail')">← Retour</button>
+          <button class="btn btn-primary btn-sm" onclick="composeReply('${escAttr(fromEmail)}','${escAttr(fromName)}','${escAttr(subject)}')">↩ Répondre</button>
+          <button class="btn btn-secondary btn-sm" onclick="openAddFromEmail('${escAttr(fromEmail)}','${escAttr(fromName)}')">➕ Candidat</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteOneEmail('${emailId}')">🗑</button>
+          <button class="btn btn-ghost btn-sm" onclick="openFolderForOne('${emailId}')">📁</button>
         </div>
       </div>
     `;
-  } catch(e) {
-    document.getElementById('email-detail-content').innerHTML = `<div class="empty-state"><span class="big-icon">⚠️</span><p>${e.message}</p></div>`;
-  }
+  } catch(e) { document.getElementById('email-detail-content').innerHTML=`<div class="empty-state"><span class="big-icon">⚠️</span><p>${e.message}</p></div>`; }
 }
 
-function openAddFromEmail(email, name) {
-  const parts = name.trim().split(' ');
-  const prenom = parts[0] || '';
-  const nom = parts.slice(1).join(' ') || '';
-  document.getElementById('cfe-prenom').value = prenom;
-  document.getElementById('cfe-nom').value = nom;
-  document.getElementById('cfe-email').value = email;
-  document.getElementById('cfe-phone').value = '';
-  document.getElementById('cfe-job').value = '';
-  document.getElementById('cfe-income').value = '';
-  document.getElementById('cfe-notes').value = '';
-  const sel = document.getElementById('cfe-apt-id');
-  sel.innerHTML = D.apartments.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+function openAddFromEmail(email,name) {
+  const parts=name.trim().split(' ');
+  document.getElementById('cfe-prenom').value=parts[0]||'';
+  document.getElementById('cfe-nom').value=parts.slice(1).join(' ')||'';
+  document.getElementById('cfe-email').value=email;
+  ['phone','job','income','notes'].forEach(f=>{const el=document.getElementById('cfe-'+f);if(el)el.value='';});
+  document.getElementById('cfe-apt-id').innerHTML=D.apartments.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
   openModal('modal-cand-from-email');
 }
 
 async function deleteOneEmail(id) {
-  if (!confirm('Supprimer cet email ?')) return;
-  try {
-    gapi.client.setToken({ access_token: D.gmail.accessToken });
-    await gapi.client.gmail.users.messages.trash({ userId:'me', id });
-    showToast('Email supprimé', 'success');
-    showPage('gmail');
-  } catch(e) { showToast('Erreur', 'error'); }
+  if(!confirm('Supprimer ?'))return;
+  try{ gapi.client.setToken({access_token:D.gmail.accessToken}); await gapi.client.gmail.users.messages.trash({userId:'me',id}); showToast('Supprimé','success'); showPage('gmail'); }
+  catch(e){showToast('Erreur','error');}
 }
 
-function openFolderForOne(id) {
-  D.selectedEmails = [id];
-  openFolderModal();
-}
-
+function openFolderForOne(id) { D.selectedEmails=[id]; openFolderModal(); }
 function filterEmails(q) {
-  const lq = q.toLowerCase();
-  const filtered = gmailEmails.filter(e => e.from.toLowerCase().includes(lq) || e.subject.toLowerCase().includes(lq) || e.snippet.toLowerCase().includes(lq));
-  document.getElementById('email-list').innerHTML = filtered.map(e => renderEmailItem(e, 'INBOX')).join('');
+  const lq=q.toLowerCase();
+  const f=gmailEmails.filter(e=>e.from.toLowerCase().includes(lq)||e.subject.toLowerCase().includes(lq)||e.snippet.toLowerCase().includes(lq));
+  document.getElementById('email-list').innerHTML=f.map(e=>renderEmailItem(e)).join('');
 }
 
 function guessApt(email) {
-  const txt = (email.subject + ' ' + email.snippet).toLowerCase();
-  for (const apt of D.apartments) {
-    if (apt.name.toLowerCase().split(' ').some(w => w.length > 3 && txt.includes(w))) return apt.name.substring(0,16)+(apt.name.length>16?'…':'');
-  }
+  const txt=(email.subject+' '+email.snippet).toLowerCase();
+  for(const apt of D.apartments) if(apt.name.toLowerCase().split(' ').some(w=>w.length>3&&txt.includes(w))) return apt.name.substring(0,14)+(apt.name.length>14?'…':'');
   return null;
 }
 
 function fmtDate(s) {
-  try {
-    const d = new Date(s), now = new Date();
-    const diff = Math.floor((now-d)/86400000);
-    if (diff === 0) return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    if (diff === 1) return 'Hier';
-    if (diff < 7) return d.toLocaleDateString('fr-FR',{weekday:'short'});
+  try{ const d=new Date(s),now=new Date(),diff=Math.floor((now-d)/86400000);
+    if(diff===0)return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    if(diff===1)return 'Hier'; if(diff<7)return d.toLocaleDateString('fr-FR',{weekday:'short'});
     return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
-  } catch { return ''; }
+  }catch{return '';}
 }
 
 // =============================================
 // COMPOSE
 // =============================================
 function renderCompose(def={}) {
-  if (!D.gmail.configured || !D.gmail.accessToken) {
-    document.getElementById('compose-content').innerHTML = `<div class="gmail-connect-banner"><span class="big-icon">✍️</span><h3>Gmail requis</h3><p>Connectez Gmail pour envoyer des emails.</p><button class="btn btn-gmail" onclick="showPage('settings')">⚙️ Configurer</button></div>`;
-    return;
+  if (!D.gmail.configured||!D.gmail.accessToken) {
+    document.getElementById('compose-content').innerHTML=`<div class="gmail-connect-banner"><span class="big-icon">✍️</span><h3>Gmail requis</h3><p>Connectez Gmail pour envoyer.</p><button class="btn btn-gmail" onclick="showPage('settings')">⚙️ Configurer</button></div>`; return;
   }
-  // Build contacts from all candidates
-  const contacts = [];
-  D.apartments.forEach(apt => apt.candidates.forEach(c => { if (c.email) contacts.push({ name: `${c.prenom} ${c.nom}`, email: c.email, apt: apt.name }); }));
-
-  document.getElementById('compose-content').innerHTML = `
+  const contacts=[];
+  D.apartments.forEach(apt=>apt.candidates.forEach(c=>{if(c.email)contacts.push({name:`${c.prenom} ${c.nom}`,email:c.email,apt:apt.name});}));
+  document.getElementById('compose-content').innerHTML=`
     <div class="compose-box">
       <div class="compose-header"><span>📧 ${D.gmail.email}</span></div>
       <div class="compose-body">
         <div class="compose-field">
           <label>À</label>
-          <div class="contact-dropdown" style="flex:1">
-            <input type="email" id="compose-to" value="${escAttr(def.to||'')}" placeholder="destinataire@email.fr ou choisir un contact ↓" oninput="filterContacts(this.value)" style="width:100%;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.86rem">
+          <div class="contact-dropdown">
+            <input type="email" id="compose-to" value="${escAttr(def.to||'')}" placeholder="destinataire@email.fr" oninput="filterContacts(this.value)" style="width:100%;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.86rem;background:transparent">
             <div class="contact-list" id="contacts-list" style="display:none">
-              ${contacts.map(c=>`<div class="contact-item" onclick="selectContact('${escAttr(c.email)}','${escAttr(c.name)}')"><span>${c.name} <span style="color:var(--text-muted);font-size:0.78rem">(${c.apt})</span></span><span class="contact-email">${c.email}</span></div>`).join('')}
+              ${contacts.map(c=>`<div class="contact-item" onclick="selectContact('${escAttr(c.email)}','${escAttr(c.name)}')"><span>${c.name} <span style="color:var(--text-muted);font-size:0.72rem">(${c.apt})</span></span><span class="contact-email">${c.email}</span></div>`).join('')}
             </div>
           </div>
-          <button class="btn-icon" onclick="toggleContacts()" title="Carnet d'adresses">👤</button>
+          <button class="btn-icon" onclick="toggleContacts()" title="Contacts">👤</button>
         </div>
-        <div class="compose-field"><label>Objet</label><input type="text" id="compose-subject" value="${escAttr(def.subject||'')}" placeholder="Objet…"></div>
-        <textarea class="compose-textarea" id="compose-body" placeholder="Écrivez votre message…">${def.body||''}</textarea>
-        <div id="attachment-info" style="font-size:0.78rem;color:var(--sage);padding:4px 0;display:none">📎 Fiche pré-visite jointe</div>
+        <div class="compose-field"><label>Objet</label><input type="text" id="compose-subject" value="${escAttr(def.subject||'')}" style="flex:1;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.86rem;background:transparent"></div>
+        <textarea class="compose-textarea" id="compose-body" placeholder="Votre message…">${def.body||''}</textarea>
+        <div id="attachment-info" style="font-size:0.76rem;color:var(--sage);padding:3px 0;display:none">📎 Fiche pré-visite jointe</div>
       </div>
       <div class="compose-footer">
-        <button class="btn btn-primary" onclick="sendEmail()">📤 Envoyer</button>
-        <button class="btn btn-ghost" onclick="toggleTemplateSelector()">💬 Modèle</button>
-        <button class="btn btn-ghost" onclick="attachFiche()">📋 Joindre fiche</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('compose-body').value=''">🗑</button>
+        <button class="btn btn-primary btn-sm" onclick="sendEmail()">📤 Envoyer</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleTemplateSelector()">💬 Modèle</button>
+        <button class="btn btn-ghost btn-sm" onclick="attachFiche()">📋 Fiche</button>
       </div>
     </div>
     <div id="template-selector" style="display:none">
       ${D.messages.map(m=>`<div class="template-box" style="cursor:pointer" onclick="insertTemplate(${m.id})">
-        <div class="template-header"><span class="template-label">${m.title}</span><span style="font-size:0.75rem;color:var(--terracotta)">Insérer →</span></div>
-        <div class="template-content" style="font-size:0.78rem">${m.content.substring(0,80)}…</div>
+        <div class="template-header"><span class="template-label">${m.title}</span><span style="font-size:0.73rem;color:var(--terracotta)">Insérer →</span></div>
+        <div class="template-content" style="font-size:0.76rem">${m.content.substring(0,70)}…</div>
       </div>`).join('')}
     </div>
   `;
 }
 
-let ficheAttached = false;
-function attachFiche() {
-  ficheAttached = true;
-  document.getElementById('attachment-info').style.display = '';
-  showToast('Fiche pré-visite jointe ✓', 'success');
+function attachFiche(){document.getElementById('attachment-info').style.display='';showToast('Fiche jointe ✓','success');}
+function toggleContacts(){const cl=document.getElementById('contacts-list');cl.style.display=cl.style.display==='none'?'block':'none';}
+function filterContacts(val){
+  const contacts=[];
+  D.apartments.forEach(apt=>apt.candidates.forEach(c=>{if(c.email&&(c.email.includes(val)||`${c.prenom} ${c.nom}`.toLowerCase().includes(val.toLowerCase())))contacts.push({name:`${c.prenom} ${c.nom}`,email:c.email,apt:apt.name});}));
+  const cl=document.getElementById('contacts-list');
+  if(val&&contacts.length){cl.style.display='block';cl.innerHTML=contacts.map(c=>`<div class="contact-item" onclick="selectContact('${escAttr(c.email)}','${escAttr(c.name)}')"><span>${c.name}</span><span class="contact-email">${c.email}</span></div>`).join('');}
+  else cl.style.display='none';
 }
-
-function toggleContacts() {
-  const cl = document.getElementById('contacts-list');
-  cl.style.display = cl.style.display === 'none' ? 'block' : 'none';
-}
-
-function filterContacts(val) {
-  const contacts = [];
-  D.apartments.forEach(apt => apt.candidates.forEach(c => { if (c.email && (c.email.includes(val) || `${c.prenom} ${c.nom}`.toLowerCase().includes(val.toLowerCase()))) contacts.push({ name:`${c.prenom} ${c.nom}`, email:c.email, apt:apt.name }); }));
-  const cl = document.getElementById('contacts-list');
-  if (val && contacts.length) {
-    cl.style.display = 'block';
-    cl.innerHTML = contacts.map(c=>`<div class="contact-item" onclick="selectContact('${escAttr(c.email)}','${escAttr(c.name)}')"><span>${c.name}</span><span class="contact-email">${c.email}</span></div>`).join('');
-  } else cl.style.display = 'none';
-}
-
-function selectContact(email, name) {
-  document.getElementById('compose-to').value = email;
-  document.getElementById('contacts-list').style.display = 'none';
-  if (!document.getElementById('compose-subject').value) document.getElementById('compose-subject').value = 'Location';
-}
-
-function toggleTemplateSelector() {
-  const el = document.getElementById('template-selector');
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function insertTemplate(id) {
-  const m = D.messages.find(x => x.id === id);
-  if (!m) return;
-  document.getElementById('compose-body').value = m.content;
-  document.getElementById('template-selector').style.display = 'none';
-  if (!document.getElementById('compose-subject').value) document.getElementById('compose-subject').value = m.title;
-}
-
-function composeToCandidate(email, name, aptId) {
-  const apt = D.apartments.find(a => a.id === aptId);
-  showPage('compose');
-  renderCompose({ to: email, subject: `Location – ${apt?.name||''}` });
-}
-
-function composeReply(email, name, subject) {
-  showPage('compose');
-  renderCompose({ to: email, subject: subject.startsWith('Re:') ? subject : 'Re: ' + subject });
-}
+function selectContact(email,name){document.getElementById('compose-to').value=email;document.getElementById('contacts-list').style.display='none';}
+function toggleTemplateSelector(){const el=document.getElementById('template-selector');el.style.display=el.style.display==='none'?'block':'none';}
+function insertTemplate(id){const m=D.messages.find(x=>x.id===id);if(!m)return;document.getElementById('compose-body').value=m.content;document.getElementById('template-selector').style.display='none';if(!document.getElementById('compose-subject').value)document.getElementById('compose-subject').value=m.title;}
+function composeToCandidate(email,name,aptId){const apt=D.apartments.find(a=>a.id===aptId);showPage('compose');renderCompose({to:email,subject:`Location – ${apt?.name||''}`});}
+function composeReply(email,name,subject){showPage('compose');renderCompose({to:email,subject:subject.startsWith('Re:')?subject:'Re: '+subject});}
 
 async function sendEmail() {
-  const to = document.getElementById('compose-to').value.trim();
-  const subject = document.getElementById('compose-subject').value.trim();
-  const body = document.getElementById('compose-body').value.trim();
-  if (!to || !body) { showToast('Destinataire et message requis', 'error'); return; }
+  const to=document.getElementById('compose-to').value.trim();
+  const subject=document.getElementById('compose-subject').value.trim();
+  const body=document.getElementById('compose-body').value.trim();
+  if(!to||!body){showToast('Destinataire et message requis','error');return;}
   try {
-    gapi.client.setToken({ access_token: D.gmail.accessToken });
-    const raw = makeRaw(D.gmail.email, to, subject, body);
-    await gapi.client.gmail.users.messages.send({ userId:'me', resource:{ raw } });
-    showToast('✅ Email envoyé !', 'success');
-    ficheAttached = false;
-    document.getElementById('compose-to').value = '';
-    document.getElementById('compose-subject').value = '';
-    document.getElementById('compose-body').value = '';
-    document.getElementById('attachment-info').style.display = 'none';
-  } catch(e) { showToast('Erreur : ' + (e.result?.error?.message||e.message), 'error'); }
+    gapi.client.setToken({access_token:D.gmail.accessToken});
+    const raw=makeRaw(D.gmail.email,to,subject,body);
+    await gapi.client.gmail.users.messages.send({userId:'me',resource:{raw}});
+    showToast('✅ Email envoyé !','success');
+    document.getElementById('compose-to').value='';
+    document.getElementById('compose-subject').value='';
+    document.getElementById('compose-body').value='';
+  } catch(e){showToast('Erreur: '+(e.result?.error?.message||e.message),'error');}
 }
 
-function makeRaw(from, to, subject, body) {
-  const email = [`From: ${from}`,`To: ${to}`,`Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`,'MIME-Version: 1.0','Content-Type: text/plain; charset=UTF-8','',body].join('\r\n');
+function makeRaw(from,to,subject,body){
+  const email=[`From: ${from}`,`To: ${to}`,`Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`,'MIME-Version: 1.0','Content-Type: text/plain; charset=UTF-8','',body].join('\r\n');
   return btoa(unescape(encodeURIComponent(email))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
 
@@ -1347,14 +1534,13 @@ function makeRaw(from, to, subject, body) {
 // MESSAGES
 // =============================================
 function renderMessages() {
-  const el = document.getElementById('messages-list');
-  el.innerHTML = D.messages.map(m => `
+  document.getElementById('messages-list').innerHTML=D.messages.map(m=>`
     <div class="template-box">
       <div class="template-header">
         <span class="template-label">💬 ${m.title}</span>
         <div class="template-actions">
           <button class="copy-btn" onclick="copyText(D.messages.find(x=>x.id===${m.id}).content)">📋 Copier</button>
-          ${D.gmail.configured&&D.gmail.accessToken?`<button class="btn btn-gmail btn-sm" onclick="composeWithTemplate(${m.id})">📧 Envoyer</button>`:''}
+          ${D.gmail.configured&&D.gmail.accessToken?`<button class="btn btn-gmail btn-sm" onclick="composeWithTemplate(${m.id})">📧</button>`:''}
           <button class="btn-icon" onclick="deleteMessage(${m.id})" style="color:#E74C3C">🗑</button>
         </div>
       </div>
@@ -1363,34 +1549,24 @@ function renderMessages() {
   `).join('');
 }
 
-function addMessage() {
-  const title = document.getElementById('new-msg-title').value.trim();
-  const content = document.getElementById('new-msg-content').value.trim();
-  if (!title||!content) { showToast('Remplissez tous les champs','error'); return; }
-  D.messages.push({ id: Date.now(), title, content });
+function addMessage(){
+  const title=document.getElementById('new-msg-title').value.trim();
+  const content=document.getElementById('new-msg-content').value.trim();
+  if(!title||!content){showToast('Remplissez tous les champs','error');return;}
+  D.messages.push({id:Date.now(),title,content});
   closeModal('modal-add-msg');
-  document.getElementById('new-msg-title').value = '';
-  document.getElementById('new-msg-content').value = '';
-  save(); showToast('Message ajouté !','success'); renderMessages();
+  document.getElementById('new-msg-title').value='';
+  document.getElementById('new-msg-content').value='';
+  save();showToast('Ajouté !','success');renderMessages();
 }
-
-function deleteMessage(id) {
-  if (!confirm('Supprimer ce message ?')) return;
-  D.messages = D.messages.filter(m => m.id !== id);
-  save(); renderMessages(); showToast('Message supprimé');
-}
-
-function composeWithTemplate(id) {
-  const m = D.messages.find(x => x.id === id);
-  showPage('compose');
-  renderCompose({ subject: m.title, body: m.content });
-}
+function deleteMessage(id){if(!confirm('Supprimer ?'))return;D.messages=D.messages.filter(m=>m.id!==id);save();renderMessages();showToast('Supprimé');}
+function composeWithTemplate(id){const m=D.messages.find(x=>x.id===id);showPage('compose');renderCompose({subject:m.title,body:m.content});}
 
 // =============================================
-// FICHE + PDF
+// FICHE
 // =============================================
 function renderFiche() {
-  document.getElementById('fiche-content').innerHTML = `
+  document.getElementById('fiche-content').innerHTML=`
     <h3>🏠 Fiche Candidature – Location meublée</h3>
     <div class="fiche-section-title">Appartement concerné</div>
     <div class="fiche-field"><label>Référence / Adresse</label><div class="fiche-line"></div></div>
@@ -1412,125 +1588,134 @@ function renderFiche() {
     <div class="fiche-field"><label>Revenus nets garant</label><div class="fiche-line"></div></div>
     <div class="fiche-section-title">Situation locative</div>
     <div class="fiche-field"><label>Locataire actuel ?</label><div class="fiche-line"></div></div>
-    <div class="fiche-field"><label>Date d'emménagement souhaitée</label><div class="fiche-line"></div></div>
+    <div class="fiche-field"><label>Date emménagement souhaitée</label><div class="fiche-line"></div></div>
     <div class="fiche-field"><label>Nombre d'occupants</label><div class="fiche-line"></div></div>
     <div class="fiche-field"><label>Animaux de compagnie</label><div class="fiche-line"></div></div>
     <div class="fiche-section-title">Signature</div>
-    <div style="display:flex;gap:60px;margin-top:8px">
+    <div style="display:flex;gap:40px;margin-top:6px">
       <div class="fiche-field" style="flex:1"><label>Date</label><div class="fiche-line"></div></div>
       <div class="fiche-field" style="flex:1"><label>Signature</label><div class="fiche-line"></div></div>
     </div>
-    <div style="margin-top:18px;font-size:0.7rem;color:var(--text-muted);text-align:center;font-style:italic">Formulaire confidentiel – usage exclusif pour l'étude de la candidature</div>
+    <div style="margin-top:16px;font-size:0.68rem;color:var(--text-muted);text-align:center;font-style:italic">Formulaire confidentiel – usage exclusif pour l'étude de la candidature</div>
   `;
 }
 
-function downloadFichePDF() {
-  window.print();
-  showToast('💡 Dans la boîte d\'impression, choisissez "Enregistrer en PDF"', 'success');
-}
+function downloadFichePDF(){window.print();showToast('💡 Choisissez "Enregistrer en PDF" dans l\'impression','success');}
 
 // =============================================
 // SETTINGS
 // =============================================
 function renderSettings() {
-  document.getElementById('settings-content').innerHTML = `
-    <div class="info-box"><strong>🔒 Sécurité</strong>Vos clés API restent exclusivement dans votre navigateur.</div>
+  document.getElementById('settings-content').innerHTML=`
+    <div class="info-box">🔒 Vos clés restent dans votre navigateur. Ne partagez jamais votre token Airtable.</div>
+
     <div class="section">
-      <div class="section-header"><h3 class="section-title">🔧 Configuration Gmail</h3></div>
+      <div class="section-header"><h3 class="section-title">🔵 Airtable – Synchronisation</h3></div>
       <div class="template-box">
-        <div class="form-group"><label class="form-label">Client ID Google OAuth 2.0</label><input type="text" class="form-input" id="s-cid" value="${D.gmail.clientId||''}" placeholder="XXXXXX.apps.googleusercontent.com"></div>
+        <div class="form-group"><label class="form-label">Token d'accès personnel</label><input type="password" class="form-input" id="s-at-token" value="${D.airtable.token||''}" placeholder="pat…"></div>
+        <div class="form-group"><label class="form-label">ID de la base (appXXXXXX)</label><input type="text" class="form-input" id="s-at-base" value="${D.airtable.baseId||''}" placeholder="appXXXXXXXXXXXXXX"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="saveAirtableSettings()">💾 Enregistrer</button>
+          ${D.airtable.configured?`<button class="btn btn-secondary btn-sm" onclick="syncFromAirtable()">🔄 Synchroniser</button>`:''}
+        </div>
+        <p style="font-size:0.74rem;color:var(--text-muted);margin-top:10px">Créez un token sur <a href="https://airtable.com/create/tokens" target="_blank" style="color:var(--terracotta)">airtable.com/create/tokens</a> avec les scopes <code>data.records:read</code> et <code>data.records:write</code>. L'ID de la base commence par <code>app</code> dans l'URL.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><h3 class="section-title">📧 Gmail</h3></div>
+      <div class="template-box">
+        <div class="form-group"><label class="form-label">Client ID Google OAuth</label><input type="text" class="form-input" id="s-cid" value="${D.gmail.clientId||''}" placeholder="XXXXXX.apps.googleusercontent.com"></div>
         <div class="form-group"><label class="form-label">Adresse email dédiée</label><input type="email" class="form-input" id="s-email" value="${D.gmail.email||''}" placeholder="mes.locations@gmail.com"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="saveGmailSettings()">💾 Enregistrer</button>
-          ${D.gmail.configured?`<button class="btn btn-gmail" onclick="connectGmail()">🔑 Se connecter à Gmail</button>`:''}
-          ${D.gmail.accessToken?`<button class="btn btn-secondary" onclick="D.gmail.accessToken=null;save();updateGmailIndicator();showToast('Déconnecté');renderSettings()">Déconnecter</button>`:''}
+          <button class="btn btn-primary btn-sm" onclick="saveGmailSettings()">💾 Enregistrer</button>
+          ${D.gmail.configured?`<button class="btn btn-gmail btn-sm" onclick="connectGmail()">🔑 Connecter Gmail</button>`:''}
+          ${D.gmail.accessToken?`<button class="btn btn-secondary btn-sm" onclick="D.gmail.accessToken=null;save();updateGmailIndicator();showToast('Déconnecté');renderSettings()">Déconnecter</button>`:''}
         </div>
       </div>
     </div>
+
     <div class="section">
-      <div class="section-header"><h3 class="section-title">📖 Guide de configuration</h3></div>
-      ${[
-        ['Créer un compte Google dédié', 'Rendez-vous sur <a href="https://accounts.google.com/signup" target="_blank">accounts.google.com/signup</a> et créez une adresse Gmail dédiée (ex: <code>mes.locations@gmail.com</code>).'],
-        ['Accéder à Google Cloud Console', 'Connecté avec ce compte, allez sur <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Créez un projet "Gestion Locative".'],
-        ['Activer l\'API Gmail', 'Menu → API et services → Bibliothèque → cherchez "Gmail API" → Activer.'],
-        ['Créer les identifiants OAuth', 'API et services → Identifiants → Créer des identifiants → ID client OAuth 2.0 → Application Web. Dans "Origines JavaScript autorisées", ajoutez l\'URL de cette page.'],
-        ['Écran de consentement', 'Ajoutez votre adresse dédiée comme "Utilisateur test" dans l\'écran de consentement OAuth.'],
-        ['Coller le Client ID ici', 'Collez votre Client ID dans le champ ci-dessus → Enregistrer → Se connecter à Gmail.']
-      ].map(([t,p],i) => `<div class="setup-step"><div class="step-number">${i+1}</div><div class="step-content"><h4>${t}</h4><p>${p}</p></div></div>`).join('')}
+      <div class="section-header"><h3 class="section-title">📱 Installer sur iPhone</h3></div>
+      <div class="template-box">
+        <div class="setup-step"><div class="step-number">1</div><div class="step-content"><h4>Ouvrir dans Safari</h4><p>Ouvrez cette page dans Safari (pas Chrome).</p></div></div>
+        <div class="setup-step"><div class="step-number">2</div><div class="step-content"><h4>Bouton Partager</h4><p>Appuyez sur le bouton ↑ en bas de Safari.</p></div></div>
+        <div class="setup-step"><div class="step-number">3</div><div class="step-content"><h4>Sur l'écran d'accueil</h4><p>Choisissez "Sur l'écran d'accueil" → Ajouter. L'app apparaît comme une vraie app !</p></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><h3 class="section-title">🔧 Guide Gmail</h3></div>
+      <div class="template-box">
+        ${[
+          ['Créer un compte Google dédié','<a href="https://accounts.google.com/signup" target="_blank" style="color:var(--terracotta)">accounts.google.com/signup</a> → adresse dédiée ex: mes.locations@gmail.com'],
+          ['Google Cloud Console','<a href="https://console.cloud.google.com" target="_blank" style="color:var(--terracotta)">console.cloud.google.com</a> → Nouveau projet "Gestion Locative"'],
+          ['Activer l\'API Gmail','Menu → API et services → Bibliothèque → "Gmail API" → Activer'],
+          ['Identifiants OAuth','API et services → Identifiants → Créer → ID client OAuth 2.0 → Application Web. Ajouter l\'URL de cette page dans "Origines JavaScript autorisées"'],
+          ['Utilisateurs test','Écran de consentement → ajouter votre adresse dédiée comme utilisateur test'],
+          ['Coller le Client ID','Dans le champ ci-dessus → Enregistrer → Connecter Gmail']
+        ].map(([t,p],i)=>`<div class="setup-step"><div class="step-number">${i+1}</div><div class="step-content"><h4>${t}</h4><p>${p}</p></div></div>`).join('')}
+      </div>
     </div>
   `;
 }
 
-function saveGmailSettings() {
-  const cid = document.getElementById('s-cid').value.trim();
-  const email = document.getElementById('s-email').value.trim();
-  if (!cid||!email) { showToast('Remplissez les deux champs','error'); return; }
-  D.gmail.clientId = cid; D.gmail.email = email; D.gmail.configured = true;
-  save(); updateGmailIndicator(); showToast('✅ Enregistré !','success'); renderSettings();
+function saveAirtableSettings(){
+  const token=document.getElementById('s-at-token').value.trim();
+  const baseId=document.getElementById('s-at-base').value.trim();
+  if(!token||!baseId){showToast('Remplissez les deux champs','error');return;}
+  D.airtable.token=token; D.airtable.baseId=baseId; D.airtable.configured=true;
+  save(); updateAirtableIndicator(); showToast('✅ Airtable configuré !','success'); renderSettings();
+}
+
+function saveGmailSettings(){
+  const cid=document.getElementById('s-cid').value.trim();
+  const email=document.getElementById('s-email').value.trim();
+  if(!cid||!email){showToast('Remplissez les deux champs','error');return;}
+  D.gmail.clientId=cid; D.gmail.email=email; D.gmail.configured=true;
+  save(); updateGmailIndicator(); showToast('✅ Gmail configuré !','success'); renderSettings();
 }
 
 // =============================================
 // PHOTOS
 // =============================================
-function addPhotos(id, input) {
-  const apt = D.apartments.find(a => a.id === id);
-  if (!apt) return;
-  const files = Array.from(input.files);
-  let n = 0;
-  files.forEach(f => {
-    const r = new FileReader();
-    r.onload = e => {
-      apt.photos.push(e.target.result);
-      if (++n===files.length) { renderPhotoGrid(apt); showToast(`${files.length} photo(s) ajoutée(s)`,'success'); save(); }
-    };
-    r.readAsDataURL(f);
+function addPhotos(id,input){
+  const apt=D.apartments.find(a=>a.id===id); if(!apt)return;
+  Array.from(input.files).forEach(f=>{
+    const r=new FileReader(); r.onload=e=>{apt.photos.push(e.target.result);renderPhotoGrid(apt);save();};r.readAsDataURL(f);
   });
 }
-function renderPhotoGrid(apt) {
-  const g = document.getElementById(`photo-grid-${apt.id}`);
-  if (!g) return;
-  g.innerHTML = apt.photos.map((p,i)=>`<div class="photo-thumb"><img src="${p}"><button class="photo-delete" onclick="deletePhoto(${apt.id},${i})">✕</button></div>`).join('')
-    + `<label class="photo-add"><span class="plus">+</span><span>Ajouter</span><input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(${apt.id},this)"></label>`;
+function renderPhotoGrid(apt){
+  const g=document.getElementById(`photo-grid-${apt.id}`); if(!g)return;
+  g.innerHTML=apt.photos.map((p,i)=>`<div class="photo-thumb"><img src="${p}"><button class="photo-delete" onclick="deletePhoto(${apt.id},${i})">✕</button></div>`).join('')
+    +`<label class="photo-add"><span class="plus">+</span><span>Photo</span><input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(${apt.id},this)"></label>`;
 }
-function deletePhoto(aptId, idx) {
-  const apt = D.apartments.find(a=>a.id===aptId);
-  if (!apt) return;
-  apt.photos.splice(idx,1); renderPhotoGrid(apt); save(); showToast('Photo supprimée');
-}
+function deletePhoto(aptId,idx){const apt=D.apartments.find(a=>a.id===aptId);if(!apt)return;apt.photos.splice(idx,1);renderPhotoGrid(apt);save();showToast('Photo supprimée');}
 
 // =============================================
 // UTILS
 // =============================================
-function switchTab(btn, panelId) {
-  const container = btn.closest('.page, #apt-detail-content') || document.body;
+function switchTab(btn,panelId){
+  const container=btn.closest('.page,.apt-detail-header')?.parentElement||document.body;
   container.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   container.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(panelId)?.classList.add('active');
 }
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
-
-function copyText(t) { navigator.clipboard.writeText(t||'').then(()=>showToast('📋 Copié !','success')); }
-
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o){o.classList.remove('open');document.body.style.overflow='';}}););
+function copyText(t){navigator.clipboard.writeText(t||'').then(()=>showToast('📋 Copié !','success')).catch(()=>{showToast('Copie manuelle requis sur Safari','error');});}
 let _toast;
-function showToast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (type?' '+type:'');
-  clearTimeout(_toast);
-  _toast = setTimeout(()=>t.classList.remove('show'), 3000);
-}
-
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function escAttr(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');clearTimeout(_toast);_toast=setTimeout(()=>t.classList.remove('show'),3200);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
 // =============================================
 // INIT
 // =============================================
 updateGmailIndicator();
+updateAirtableIndicator();
 renderDashboard();
 </script>
 </body>
