@@ -1704,7 +1704,7 @@ function switchTab(btn,panelId){
 }
 function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
-document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o){o.classList.remove('open');document.body.style.overflow='';}}););
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o){o.classList.remove('open');document.body.style.overflow='';}})););
 function copyText(t){navigator.clipboard.writeText(t||'').then(()=>showToast('📋 Copié !','success')).catch(()=>{showToast('Copie manuelle requis sur Safari','error');});}
 let _toast;
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');clearTimeout(_toast);_toast=setTimeout(()=>t.classList.remove('show'),3200);}
